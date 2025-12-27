@@ -82,7 +82,7 @@ export async function createBoardElement(
  */
 export async function updateBoardElement(
   elementId: string,
-  updates: Partial<Pick<BoardElement, 'content' | 'position' | 'size' | 'color'>>
+  updates: Partial<Pick<BoardElement, 'content' | 'position' | 'size' | 'color' | 'textStyle'>>
 ): Promise<BoardElement> {
   const updateRow = mapElementToUpdateRow(updates);
 

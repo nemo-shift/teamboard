@@ -16,9 +16,9 @@ export const ThemeToggle = () => {
   return (
     <button
       onClick={toggleTheme}
-      className="p-2 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-800 transition-colors"
-      aria-label={`현재 테마: ${resolvedTheme === 'dark' ? '다크' : '라이트'}, 클릭하여 전환`}
-      title={`현재 테마: ${resolvedTheme === 'dark' ? '다크' : '라이트'}`}
+      className="p-2 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-800 transition-colors group relative"
+      aria-label={`Switch to ${resolvedTheme === 'dark' ? 'light' : 'dark'} mode`}
+      title={resolvedTheme === 'dark' ? 'Switch to light mode' : 'Switch to dark mode'}
     >
       {resolvedTheme === 'dark' ? (
         // 라이트 모드 아이콘 (다크 모드일 때 표시)

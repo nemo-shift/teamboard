@@ -13,10 +13,9 @@ import {
 
 export const LandingPage = () => {
   const { isAuthenticated } = useAuth();
-  const { classes } = useTheme();
 
   return (
-    <div className={`min-h-screen ${classes.bg}`}>
+    <div className="min-h-screen" style={{ backgroundColor: 'var(--color-base-bg)' }}>
       <HeroSection isAuthenticated={isAuthenticated} />
       <InteractiveDemoSection />
       <FeaturesSection />

@@ -17,13 +17,14 @@ export const BoardStats = ({
   recentActivity,
   todayBoards,
 }: BoardStatsProps) => {
+
   return (
     <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-5 sm:gap-6 mb-10">
       {/* 총 보드 개수 */}
       <StatCard
         icon={
           <svg
-            className="w-5 h-5 text-gray-600 dark:text-gray-300"
+            className="w-5 h-5"
             fill="none"
             stroke="currentColor"
             viewBox="0 0 24 24"
@@ -44,7 +45,7 @@ export const BoardStats = ({
       <StatCard
         icon={
           <svg
-            className="w-5 h-5 text-gray-600 dark:text-gray-300"
+            className="w-5 h-5"
             fill="none"
             stroke="currentColor"
             viewBox="0 0 24 24"
@@ -65,7 +66,7 @@ export const BoardStats = ({
       <StatCard
         icon={
           <svg
-            className="w-5 h-5 text-gray-600 dark:text-gray-300"
+            className="w-5 h-5"
             fill="none"
             stroke="currentColor"
             viewBox="0 0 24 24"
@@ -86,7 +87,7 @@ export const BoardStats = ({
       <StatCard
         icon={
           <svg
-            className="w-5 h-5 text-gray-600 dark:text-gray-300"
+            className="w-5 h-5"
             fill="none"
             stroke="currentColor"
             viewBox="0 0 24 24"
@@ -102,15 +103,15 @@ export const BoardStats = ({
         value={
           recentActivity ? (
             <>
-              <div className="text-lg font-semibold text-gray-900 dark:text-gray-100 mb-1 line-clamp-1">
+              <div className="text-lg font-semibold text-[var(--color-text-strong)] mb-1 line-clamp-1">
                 {recentActivity.name}
               </div>
-              <div className="text-gray-500 dark:text-gray-400 text-xs">
+              <div className="text-[var(--color-text-muted)] text-xs">
                 {formatDate(recentActivity.updatedAt)}
               </div>
             </>
           ) : (
-            <span className="text-gray-500 dark:text-gray-400">활동 없음</span>
+            <span className="text-[var(--color-text-muted)]">활동 없음</span>
           )
         }
         label="최근 활동"

@@ -14,9 +14,11 @@ interface UseEditGuardedHandlersProps {
     onElementResize: (elementId: string, size: { width: number; height: number }) => void;
     onElementUpdate: (elementId: string, content: string) => void;
     onElementColorChange: (elementId: string, color: string) => void;
+    onElementStyleChange?: (elementId: string, style: any) => void;
     onElementDelete: (elementId: string) => void;
     onAddNote: (position: { x: number; y: number }) => void;
     onAddImage: (position: { x: number; y: number }, file?: File) => void;
+    onAddText?: (position: { x: number; y: number }) => void;
   };
   checkCanEdit: () => boolean;
   onPermissionDenied?: () => void;
@@ -27,9 +29,11 @@ interface UseEditGuardedHandlersReturn {
   onElementResize: (elementId: string, size: { width: number; height: number }) => void;
   onElementUpdate: (elementId: string, content: string) => void;
   onElementColorChange: (elementId: string, color: string) => void;
+  onElementStyleChange?: (elementId: string, style: any) => void;
   onElementDelete: (elementId: string) => void;
   onAddNote: (position: { x: number; y: number }) => void;
   onAddImage: (position: { x: number; y: number }, file?: File) => void;
+  onAddText?: (position: { x: number; y: number }) => void;
 }
 
 export const useEditGuardedHandlers = ({
@@ -53,9 +57,11 @@ export const useEditGuardedHandlers = ({
       onElementResize: guard(handlers.onElementResize),
       onElementUpdate: guard(handlers.onElementUpdate),
       onElementColorChange: guard(handlers.onElementColorChange),
+      onElementStyleChange: handlers.onElementStyleChange ? guard(handlers.onElementStyleChange) : undefined,
       onElementDelete: guard(handlers.onElementDelete),
       onAddNote: guard(handlers.onAddNote),
       onAddImage: guard(handlers.onAddImage),
+      onAddText: handlers.onAddText ? guard(handlers.onAddText) : undefined,
     };
   }, [handlers, checkCanEdit, onPermissionDenied]);
 

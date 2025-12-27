@@ -59,17 +59,17 @@ export const DashboardPage = () => {
   const { classes } = useTheme();
 
   return (
-    <div className={`min-h-screen ${classes.bgSecondary}`}>
+    <div className="min-h-screen bg-[var(--color-base-bg)]">
 
       {/* Main Content */}
       <main className="max-w-7xl mx-auto px-6 sm:px-8 lg:px-12 py-8 sm:py-12">
         {/* Header */}
         <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-6 mb-10">
           <div>
-            <h1 className="text-3xl sm:text-4xl lg:text-5xl font-bold text-gray-900 mb-2 tracking-tight">
+            <h1 className="text-3xl sm:text-4xl lg:text-5xl font-bold text-[var(--color-text-strong)] mb-2 tracking-tight">
               내 보드
             </h1>
-            <p className="text-base sm:text-lg text-gray-500">
+            <p className="text-base sm:text-lg text-[var(--color-text-body)] dark:text-[var(--color-text-secondary)]">
               보드를 생성하고 아이디어를 공유하세요
             </p>
           </div>
@@ -105,11 +105,11 @@ export const DashboardPage = () => {
         {/* 정렬 옵션 */}
         <div className="flex items-center justify-between mb-6">
           <div className="flex items-center gap-2">
-            <span className={`text-sm ${classes.textSecondary}`}>정렬:</span>
+            <span className="text-sm text-[var(--color-text-body)] dark:text-[var(--color-text-secondary)]">정렬:</span>
             <select
               value={sortBy}
               onChange={(e) => setSortBy(e.target.value as SortOption)}
-              className={`px-3 py-1.5 text-sm ${classes.borderSecondary} rounded-lg ${classes.bg} focus:outline-none focus:ring-2 focus:ring-gray-900 dark:focus:ring-gray-100 focus:border-transparent transition-all ${classes.text}`}
+              className="px-3 py-1.5 text-sm border border-[var(--color-border-default)] rounded-lg bg-[var(--color-surface-default)] text-[var(--color-text-strong)] focus:outline-none focus:ring-2 focus:ring-[var(--color-border-focus)] focus:border-[var(--color-border-focus)] transition-all"
             >
               <option value="recent">최신순</option>
               <option value="starred">즐겨찾기</option>
@@ -119,7 +119,7 @@ export const DashboardPage = () => {
               <option value="activity">내 활동순</option>
             </select>
           </div>
-          <div className="text-sm text-gray-500">
+          <div className="text-sm text-[var(--color-text-muted)]">
             {sortBy === 'starred' 
               ? `즐겨찾기 ${sortedBoards.length}개`
               : `총 ${unpinnedBoards.length}개 보드${sortedPinnedBoards.length > 0 ? ` (고정 ${sortedPinnedBoards.length}개)` : ''}`}
@@ -128,16 +128,16 @@ export const DashboardPage = () => {
 
         {/* 에러 표시 */}
         {boardsError && (
-          <div className="mb-6 p-4 bg-red-50 border border-red-200 rounded-lg">
-            <p className="text-sm text-red-600">{boardsError}</p>
+          <div className="mb-6 p-4 bg-[var(--color-error)]/10 border border-[var(--color-error)]/30 rounded-lg">
+            <p className="text-sm text-[var(--color-error)]">{boardsError}</p>
           </div>
         )}
 
         {/* 로딩 상태 */}
         {isLoadingBoards ? (
           <div className="flex flex-col items-center justify-center py-32">
-            <div className={`animate-spin rounded-full h-12 w-12 border-b-2 ${classes.text} mb-4`}></div>
-            <p className={classes.textTertiary}>보드를 불러오는 중...</p>
+            <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-[var(--color-primary-main)] mb-4"></div>
+            <p className="text-[var(--color-text-muted)]">보드를 불러오는 중...</p>
           </div>
         ) : (
           <>
@@ -146,13 +146,13 @@ export const DashboardPage = () => {
               <div className="mb-8">
                 <div className="flex items-center gap-2 mb-4">
                   <svg
-                    className={`w-5 h-5 ${classes.textSecondary}`}
+                    className="w-5 h-5 text-[var(--color-primary-main)] dark:text-[var(--color-accent-lime-main)]"
                     fill="currentColor"
                     viewBox="0 0 24 24"
                   >
                     <path d="M16,12V4H17V2H7V4H8V12L6,14V16H11.2V22H12.8V16H18V14L16,12M8.8,14L10,12.8V4H14V12.8L15.2,14H8.8Z" />
                   </svg>
-                  <h2 className={`text-lg font-semibold ${classes.text}`}>고정된 보드</h2>
+                  <h2 className="text-lg font-semibold text-[var(--color-text-strong)]">고정된 보드</h2>
                 </div>
                 <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-5 sm:gap-6 mb-8">
                   {sortedPinnedBoards.map((board) => (
@@ -175,7 +175,7 @@ export const DashboardPage = () => {
                       >
                         <path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z" />
                       </svg>
-                      <h2 className={`text-lg font-semibold ${classes.text}`}>즐겨찾기</h2>
+                      <h2 className="text-lg font-semibold text-[var(--color-text-strong)]">즐겨찾기</h2>
                     </div>
                   </div>
                   <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-5 sm:gap-6">
@@ -189,7 +189,7 @@ export const DashboardPage = () => {
               <>
                 {sortedPinnedBoards.length > 0 && (
                   <div className="mb-4">
-                    <h2 className={`text-lg font-semibold ${classes.text} mb-4`}>모든 보드</h2>
+                    <h2 className="text-lg font-semibold text-[var(--color-text-strong)] mb-4">모든 보드</h2>
                   </div>
                 )}
                 {/* Boards Grid */}
@@ -203,10 +203,10 @@ export const DashboardPage = () => {
           /* Empty State */
           <div className="flex flex-col items-center justify-center py-32">
             <div className="relative mb-10">
-              {/* Empty Post-it Notes - 더 모던한 스타일 */}
-              <div className="w-56 h-56 bg-yellow-50 rounded-2xl shadow-xl transform rotate-[-4deg] flex items-center justify-center border border-yellow-200">
+              {/* Empty Post-it Notes - 코카콜라 컨셉 */}
+              <div className="w-56 h-56 bg-[var(--color-primary-tint)] dark:bg-[var(--color-accent-lime-tint)] rounded-2xl shadow-xl transform rotate-[-4deg] flex items-center justify-center border-2 border-[var(--color-primary-main)] dark:border-[var(--color-accent-lime-main)]">
                 <svg
-                  className="w-20 h-20 text-yellow-400"
+                  className="w-20 h-20 text-[var(--color-primary-main)] dark:text-[var(--color-accent-lime-main)]"
                   fill="none"
                   stroke="currentColor"
                   viewBox="0 0 24 24"
@@ -219,13 +219,13 @@ export const DashboardPage = () => {
                   />
                 </svg>
               </div>
-              <div className="absolute top-6 right-6 w-44 h-44 bg-pink-50 rounded-xl shadow-lg transform rotate-[3deg] opacity-60 border border-pink-200" />
-              <div className="absolute bottom-6 left-6 w-40 h-40 bg-blue-50 rounded-xl shadow-lg transform rotate-[-3deg] opacity-60 border border-blue-200" />
+              <div className="absolute top-6 right-6 w-44 h-44 bg-[var(--color-secondary-tint)] dark:bg-[var(--color-accent-blue-tint)] rounded-xl shadow-lg transform rotate-[3deg] opacity-60 border-2 border-[var(--color-secondary-main)] dark:border-[var(--color-accent-blue-main)]" />
+              <div className="absolute bottom-6 left-6 w-40 h-40 bg-[var(--color-surface-subtle)] dark:bg-[var(--color-surface-elevated)] rounded-xl shadow-lg transform rotate-[-3deg] opacity-60 border border-[var(--color-border-default)]" />
             </div>
-            <h2 className={`text-2xl sm:text-3xl font-bold ${classes.text} mb-3`}>
+            <h2 className="text-2xl sm:text-3xl font-bold text-[var(--color-text-strong)] mb-3">
               아직 보드가 없습니다
             </h2>
-            <p className={`${classes.textTertiary} mb-8 text-center max-w-md text-base`}>
+            <p className="text-[var(--color-text-body)] dark:text-[var(--color-text-secondary)] mb-8 text-center max-w-md text-base">
               첫 번째 보드를 만들어서 아이디어를 정리하고 팀과 공유해보세요
             </p>
               <Button

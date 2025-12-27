@@ -2,9 +2,10 @@
 
 import { useState, useRef, useCallback, useEffect } from 'react';
 import type { BoardElement, CursorPosition } from '@entities/element';
-import { ColorPicker, DEFAULT_POSTIT_COLOR, ConfirmDialog } from '@shared/ui';
-import { formatUserName, DEFAULT_BACKGROUND_COLOR, useTheme } from '@shared/lib';
-import { DEFAULT_NOTE_COLOR } from '@features/content/lib/constants';
+import { ConfirmDialog } from '@shared/ui';
+import { formatUserName, useTheme } from '@shared/lib';
+import { CANVAS_GRID_SIZE } from '@features/content/lib/constants';
+import { NoteElement, ImageElement, TextElement, ZoomControls } from './components';
 
 interface BoardCanvasProps {
   boardId: string;
@@ -14,10 +15,12 @@ interface BoardCanvasProps {
   onElementResize: (elementId: string, size: { width: number; height: number }) => void;
   onElementUpdate: (elementId: string, content: string) => void;
   onElementColorChange: (elementId: string, color: string) => void;
+  onElementStyleChange?: (elementId: string, style: any) => void;
   onElementDelete: (elementId: string) => void;
   onAddNote: (position: { x: number; y: number }) => void;
   onAddImage: (position: { x: number; y: number }) => void;
-  addMode?: 'note' | 'image' | null;
+  onAddText?: (position: { x: number; y: number }) => void;
+  addMode?: 'note' | 'image' | 'text' | null;
   canEdit?: boolean; // 편집 가능 여부 (익명 사용자 + 비공개 보드 체크용)
   onEditBlocked?: () => void; // 편집이 차단되었을 때 호출되는 콜백
   isOwner?: boolean; // 보드 소유자 여부
@@ -32,9 +35,11 @@ export const BoardCanvas = ({
   onElementResize,
   onElementUpdate,
   onElementColorChange,
+  onElementStyleChange,
   onElementDelete,
   onAddNote,
   onAddImage,
+  onAddText,
   addMode = null,
   canEdit = true,
   onEditBlocked,
@@ -62,7 +67,7 @@ export const BoardCanvas = ({
   const [deleteConfirm, setDeleteConfirm] = useState<{
     isOpen: boolean;
     elementId: string | null;
-    elementType: 'note' | 'image' | null;
+    elementType: 'note' | 'image' | 'text' | null;
   }>({
     isOpen: false,
     elementId: null,
@@ -70,10 +75,8 @@ export const BoardCanvas = ({
   });
   const canvasRef = useRef<HTMLDivElement>(null);
   const textareaRef = useRef<HTMLTextAreaElement>(null);
+  const contentEditableRef = useRef<HTMLDivElement>(null);
   const [mousePosition, setMousePosition] = useState({ x: 0, y: 0 });
-  const [zoomInputValue, setZoomInputValue] = useState('');
-  const [isEditingZoom, setIsEditingZoom] = useState(false);
-  const [failedImages, setFailedImages] = useState<Set<string>>(new Set());
 
   // boardId가 변경될 때 offset과 scale 초기화
   useEffect(() => {
@@ -251,6 +254,8 @@ export const BoardCanvas = ({
           onAddNote({ x, y });
         } else if (addMode === 'image') {
           onAddImage({ x, y });
+        } else if (addMode === 'text' && onAddText) {
+          onAddText({ x, y });
         }
       }
     }
@@ -274,7 +279,7 @@ export const BoardCanvas = ({
       const elementId = elementContainer.getAttribute('data-element-id');
       if (elementId) {
         const element = elements.find((el) => el.id === elementId);
-        if (element && element.type === 'note') {
+        if (element && (element.type === 'note' || element.type === 'text')) {
           setEditingElement(elementId);
           setEditContent(element.content);
         }
@@ -298,7 +303,7 @@ export const BoardCanvas = ({
       // ESC로 편집 취소 (편집 모드일 때만)
       if (e.key === 'Escape' && editingElement) {
         const element = elements.find((el) => el.id === editingElement);
-        if (element?.type === 'note') {
+        if (element?.type === 'note' || element?.type === 'text') {
           setEditingElement(null);
           setEditContent('');
         }
@@ -307,15 +312,15 @@ export const BoardCanvas = ({
       
       // Delete 키로 삭제 (Backspace는 제거)
       if (e.key === 'Delete') {
-        // 편집 모드일 때 (포스트잇만)
+        // 편집 모드일 때 (포스트잇, 텍스트)
         if (editingElement) {
           const element = elements.find((el) => el.id === editingElement);
-          if (element?.type === 'note') {
+          if (element?.type === 'note' || element?.type === 'text') {
             e.preventDefault();
             setDeleteConfirm({
               isOpen: true,
               elementId: editingElement,
-              elementType: 'note',
+              elementType: element.type,
             });
           }
           return;
@@ -392,6 +397,8 @@ export const BoardCanvas = ({
       return '정말 이 포스트잇을 삭제하시겠습니까?';
     } else if (deleteConfirm.elementType === 'image') {
       return '정말 이 이미지를 삭제하시겠습니까?';
+    } else if (deleteConfirm.elementType === 'text') {
+      return '정말 이 텍스트를 삭제하시겠습니까?';
     }
     return '정말 이 요소를 삭제하시겠습니까?';
   };
@@ -424,17 +431,29 @@ export const BoardCanvas = ({
         handleClick(e);
       }}
       onDoubleClick={handleDoubleClick}
-      style={{ cursor: addMode === 'note' ? 'crosshair' : addMode === 'image' ? 'crosshair' : 'grab' }}
+      style={{ cursor: addMode === 'note' || addMode === 'image' || addMode === 'text' ? 'crosshair' : 'grab' }}
     >
       {/* 그리드 배경 */}
       <div
-        className="absolute inset-0 opacity-[0.03] dark:opacity-[0.05]"
+        className="absolute inset-0 opacity-[0.03] dark:opacity-[0.15]"
         style={{
           backgroundImage: `
             linear-gradient(to right, black 1px, transparent 1px),
             linear-gradient(to bottom, black 1px, transparent 1px)
           `,
-          backgroundSize: `${40 * scale}px ${40 * scale}px`,
+          backgroundSize: `${CANVAS_GRID_SIZE * scale}px ${CANVAS_GRID_SIZE * scale}px`,
+          transform: `translate(${offset.x}px, ${offset.y}px)`,
+        }}
+      />
+      {/* 다크모드용 밝은 그리드 */}
+      <div
+        className="absolute inset-0 opacity-0 dark:opacity-[0.08]"
+        style={{
+          backgroundImage: `
+            linear-gradient(to right, white 1px, transparent 1px),
+            linear-gradient(to bottom, white 1px, transparent 1px)
+          `,
+          backgroundSize: `${CANVAS_GRID_SIZE * scale}px ${CANVAS_GRID_SIZE * scale}px`,
           transform: `translate(${offset.x}px, ${offset.y}px)`,
         }}
       />
@@ -451,7 +470,23 @@ export const BoardCanvas = ({
       >
         {elements.map((element) => {
           const isEditing = editingElement === element.id;
+          const isSelected = selectedElement === element.id;
           
+          // 리사이즈 핸들 시작 핸들러
+          const handleResizeStart = (e: React.MouseEvent) => {
+            e.stopPropagation();
+            const rect = canvasRef.current?.getBoundingClientRect();
+            if (rect) {
+              setResizeStart({
+                x: (e.clientX - rect.left - offsetRef.current.x) / scale,
+                y: (e.clientY - rect.top - offsetRef.current.y) / scale,
+                width: element.size.width,
+                height: element.size.height,
+              });
+              setResizingElement(element.id);
+            }
+          };
+
           return (
             <div
               key={element.id}
@@ -463,40 +498,35 @@ export const BoardCanvas = ({
                 width: `${element.size.width}px`,
                 height: `${element.size.height}px`,
               }}
-                      onClick={(e) => {
-                        // 삭제 버튼이나 색상 선택기 클릭은 무시
-                        const target = e.target as HTMLElement;
-                        if (target.closest('button[title="삭제 (Delete 키)"]') || 
-                            target.closest('[data-color-picker]') ||
-                            target.closest('.color-picker-popup')) {
-                          return;
-                        }
-                        
-                        if (!isEditing && !resizingElement) {
-                          e.stopPropagation();
-                          // 클릭 시 선택/해제 토글 (편집 모드는 더블클릭으로만 진입)
-                          if (selectedElement === element.id) {
-                            setSelectedElement(null);
-                          } else {
-                            setSelectedElement(element.id);
-                          }
-                        }
-                      }}
+              onClick={(e) => {
+                // 삭제 버튼이나 색상 선택기, 텍스트 툴바 클릭은 무시
+                const target = e.target as HTMLElement;
+                const isContentEditable = target.closest('[contenteditable="true"]');
+                
+                if (target.closest('button[title="삭제 (Delete 키)"]') || 
+                    target.closest('[data-color-picker]') ||
+                    target.closest('.color-picker-popup') ||
+                    target.closest('[data-text-toolbar]') ||
+                    // 편집 모드일 때 contentEditable 내부 클릭은 무시
+                    (isEditing && isContentEditable)) {
+                  return;
+                }
+                
+                if (!isEditing && !resizingElement) {
+                  e.stopPropagation();
+                  // 클릭 시 선택/해제 토글 (편집 모드는 더블클릭으로만 진입)
+                  if (selectedElement === element.id) {
+                    setSelectedElement(null);
+                  } else {
+                    setSelectedElement(element.id);
+                  }
+                }
+              }}
               onMouseDown={(e) => {
                 // 리사이즈 핸들 클릭 체크
                 const target = e.target as HTMLElement;
                 if (target.classList.contains('resize-handle')) {
-                  e.stopPropagation();
-                  const rect = canvasRef.current?.getBoundingClientRect();
-                  if (rect) {
-                    setResizeStart({
-                      x: (e.clientX - rect.left - offsetRef.current.x) / scale,
-                      y: (e.clientY - rect.top - offsetRef.current.y) / scale,
-                      width: element.size.width,
-                      height: element.size.height,
-                    });
-                    setResizingElement(element.id);
-                  }
+                  handleResizeStart(e);
                   return;
                 }
                 
@@ -522,236 +552,92 @@ export const BoardCanvas = ({
                 }
               }}
             >
-            {element.type === 'note' ? (
-              <div
-                className={`w-full h-full rounded-lg shadow-sm p-3 hover:shadow-md transition-all relative ${
-                  selectedElement === element.id && !isEditing
-                    ? 'ring-2 ring-blue-500 ring-offset-2 shadow-lg'
-                    : classes.border
-                }`}
-                style={{ backgroundColor: element.color || DEFAULT_BACKGROUND_COLOR }}
-              >
-                {isEditing ? (
-                  <div className="h-full flex flex-col relative" onClick={(e) => e.stopPropagation()}>
-                    {/* 삭제 버튼과 색상 선택기 - 같은 줄에 배치 */}
-                    <div className="mb-2 flex items-center justify-between z-10 relative">
-                      {/* 삭제 버튼 - 포스트잇 안쪽 왼쪽 (보드 소유자이거나 요소 소유자인 경우만 표시) */}
-                      {(isOwner || element.userId === currentUserId) && (
-                        <button
-                          type="button"
-                          onClick={(e) => {
-                            e.preventDefault();
-                            e.stopPropagation();
-                            setDeleteConfirm({
-                              isOpen: true,
-                              elementId: element.id,
-                              elementType: 'note',
-                            });
-                          }}
-                          onMouseDown={(e) => {
-                            e.preventDefault();
-                            e.stopPropagation();
-                          }}
-                          className="w-6 h-6 flex items-center justify-center rounded transition-colors z-20 relative"
-                          title="삭제 (Delete 키)"
-                        >
-                        <svg
-                          className={`w-4 h-4 ${classes.text} hover:text-red-500 transition-colors`}
-                          fill="none"
-                          stroke="currentColor"
-                          viewBox="0 0 24 24"
-                        >
-                          <path
-                            strokeLinecap="round"
-                            strokeLinejoin="round"
-                            strokeWidth={2.5}
-                            d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"
-                          />
-                        </svg>
-                        </button>
-                      )}
-                      
-                      {/* 색상 선택기 - 오른쪽 */}
-                      <ColorPicker
-                        selectedColor={element.color || DEFAULT_NOTE_COLOR}
-                        onColorSelect={(color) => {
-                          onElementColorChange(element.id, color);
-                          // 색상 선택 후에도 편집 모드 유지
-                          if (textareaRef.current) {
-                            setTimeout(() => {
-                              textareaRef.current?.focus();
-                            }, 0);
-                          }
-                        }}
-                      />
-                    </div>
-                    
-                    {/* 텍스트 입력 영역 */}
-                    <textarea
-                      ref={textareaRef}
-                      value={editContent}
-                      onChange={(e) => setEditContent(e.target.value)}
-                      onBlur={(e) => {
-                        // 색상 선택 버튼이나 팔레트를 클릭한 경우 blur 방지
-                        const relatedTarget = e.relatedTarget as HTMLElement;
-                        if (relatedTarget && (
-                          relatedTarget.closest('[data-color-picker]') ||
-                          relatedTarget.closest('.color-picker-popup')
-                        )) {
-                          return;
-                        }
-                        // 포커스가 색상 선택 관련 요소로 이동한 경우 방지
-                        const activeElement = document.activeElement;
-                        if (activeElement && (
-                          activeElement.closest('[data-color-picker]') ||
-                          activeElement.closest('.color-picker-popup')
-                        )) {
-                          return;
-                        }
-                        handleEditComplete();
-                      }}
-                      onKeyDown={(e) => {
-                        if (e.key === 'Enter' && (e.metaKey || e.ctrlKey)) {
-                          handleEditComplete();
-                        }
-                      }}
-                      onClick={(e) => e.stopPropagation()}
-                      className={`flex-1 text-sm ${classes.text} resize-none outline-none border-none bg-transparent`}
-                      style={{ minHeight: '60px' }}
-                      placeholder="텍스트를 입력하세요..."
-                    />
-                  </div>
-                ) : (
-                  <div className="h-full flex flex-col">
-                    {/* 텍스트 영역 - 스크롤 가능, 생성자 표시 위까지만 */}
-                    <div className={`text-sm ${classes.text} whitespace-pre-wrap break-words flex-1 min-h-[60px] overflow-y-auto note-scrollbar`}>
-                      {element.content || '더블클릭하여 편집'}
-                    </div>
-                    {/* 작성자 표시 - 항상 표시 (고정) */}
-                    <div className={`mt-2 pt-2 border-t ${classes.border} flex-shrink-0`}>
-                      <div className="flex items-center gap-1.5">
-                        <div className={`w-1.5 h-1.5 rounded-full ${classes.textTertiary}`} />
-                        <span className={`text-xs ${classes.textTertiary}`}>
-                          {formatUserName(element.userName)}
-                        </span>
-                      </div>
-                    </div>
-                  </div>
-                )}
-                
-                {/* 리사이즈 핸들 */}
-                {!isEditing && (
-                  <div
-                    className="resize-handle absolute bottom-0 right-0 w-4 h-4 cursor-se-resize bg-gray-200 border border-gray-300 rounded-tl-lg opacity-0 group-hover:opacity-100 transition-opacity"
-                    onMouseDown={(e) => {
-                      e.stopPropagation();
-                      const rect = canvasRef.current?.getBoundingClientRect();
-                      if (rect) {
-                        // offsetRef를 사용하여 드래그 중에도 정확한 위치 계산
-                        setResizeStart({
-                          x: (e.clientX - rect.left - offsetRef.current.x) / scale,
-                          y: (e.clientY - rect.top - offsetRef.current.y) / scale,
-                          width: element.size.width,
-                          height: element.size.height,
-                        });
-                        setResizingElement(element.id);
-                      }
-                    }}
-                  >
-                    <div className="absolute bottom-1 right-1 w-2 h-2 border-r-2 border-b-2 border-gray-400" />
-                  </div>
-                )}
-              </div>
-            ) : (
-              <div
-                className={`w-full h-full rounded-lg overflow-hidden relative ${classes.bg} group transition-all ${
-                  selectedElement === element.id
-                    ? 'ring-2 ring-blue-500 ring-offset-2 shadow-lg'
-                    : classes.border
-                }`}
-              >
-                {/* 삭제 버튼 - 마우스 오버 시 표시, 오른쪽 상단 모서리 (이미지 안쪽) (보드 소유자이거나 요소 소유자인 경우만 표시) */}
-                {(isOwner || element.userId === currentUserId) && (
-                  <button
-                    onClick={(e) => {
-                      e.stopPropagation();
-                      setDeleteConfirm({
-                        isOpen: true,
-                        elementId: element.id,
-                        elementType: 'image',
-                      });
-                    }}
-                    className="absolute top-2 right-2 w-6 h-6 flex items-center justify-center rounded transition-colors z-50 opacity-0 group-hover:opacity-100"
-                    title="삭제 (Delete 키)"
-                  >
-                  <svg
-                    className={`w-4 h-4 ${classes.text} hover:text-red-500 transition-colors`}
-                    fill="none"
-                    stroke="currentColor"
-                    viewBox="0 0 24 24"
-                  >
-                    <path
-                      strokeLinecap="round"
-                      strokeLinejoin="round"
-                      strokeWidth={2.5}
-                      d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"
-                    />
-                  </svg>
-                  </button>
-                )}
-                {failedImages.has(element.id) ? (
-                  <div className="w-full h-full flex items-center justify-center bg-gray-100 text-gray-400">
-                    <div className="text-center">
-                      <svg
-                        className="w-12 h-12 mx-auto mb-2"
-                        fill="none"
-                        stroke="currentColor"
-                        viewBox="0 0 24 24"
-                      >
-                        <path
-                          strokeLinecap="round"
-                          strokeLinejoin="round"
-                          strokeWidth={2}
-                          d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z"
-                        />
-                      </svg>
-                      <p className="text-xs">이미지를 불러올 수 없습니다</p>
-                    </div>
-                  </div>
-                ) : (
-                  <img
-                    src={element.content}
-                    alt="업로드된 이미지"
-                    className="w-full h-full object-contain"
-                    draggable={false}
-                    onError={() => {
-                      setFailedImages((prev) => new Set(prev).add(element.id));
-                    }}
-                  />
-                )}
-                
-                {/* 리사이즈 핸들 */}
-                <div
-                  className="resize-handle absolute bottom-0 right-0 w-4 h-4 cursor-se-resize bg-gray-200 border border-gray-300 rounded-tl-lg opacity-0 group-hover:opacity-100 transition-opacity"
-                  onMouseDown={(e) => {
+              {element.type === 'note' ? (
+                <NoteElement
+                  element={element}
+                  isEditing={isEditing}
+                  editContent={editContent}
+                  isSelected={isSelected}
+                  isOwner={isOwner}
+                  currentUserId={currentUserId}
+                  scale={scale}
+                  onEditContentChange={setEditContent}
+                  onEditComplete={handleEditComplete}
+                  onColorChange={(color) => onElementColorChange(element.id, color)}
+                  onDelete={() => {
+                    setDeleteConfirm({
+                      isOpen: true,
+                      elementId: element.id,
+                      elementType: 'note',
+                    });
+                  }}
+                  onResizeStart={handleResizeStart}
+                  textareaRef={textareaRef}
+                />
+              ) : element.type === 'text' ? (
+                <TextElement
+                  element={element}
+                  isEditing={isEditing}
+                  editContent={editContent}
+                  isSelected={isSelected}
+                  isOwner={isOwner}
+                  currentUserId={currentUserId}
+                  scale={scale}
+                  onEditContentChange={setEditContent}
+                  onEditComplete={handleEditComplete}
+                  onStyleChange={(style) => {
+                    if (onElementStyleChange) {
+                      onElementStyleChange(element.id, style);
+                    }
+                  }}
+                  onDelete={() => {
+                    setDeleteConfirm({
+                      isOpen: true,
+                      elementId: element.id,
+                      elementType: 'text',
+                    });
+                  }}
+                  onDragStart={(e) => {
                     e.stopPropagation();
                     const rect = canvasRef.current?.getBoundingClientRect();
                     if (rect) {
-                      // offsetRef를 사용하여 드래그 중에도 정확한 위치 계산
-                      setResizeStart({
-                        x: (e.clientX - rect.left - offsetRef.current.x) / scale,
-                        y: (e.clientY - rect.top - offsetRef.current.y) / scale,
-                        width: element.size.width,
-                        height: element.size.height,
+                      const mouseX = (e.clientX - rect.left - offsetRef.current.x) / scale;
+                      const mouseY = (e.clientY - rect.top - offsetRef.current.y) / scale;
+                      setElementDragStart({
+                        x: mouseX - element.position.x,
+                        y: mouseY - element.position.y,
                       });
-                      setResizingElement(element.id);
+                      setDraggedElement(element.id);
+                      lastElementPositionRef.current = null;
                     }
                   }}
-                >
-                  <div className="absolute bottom-1 right-1 w-2 h-2 border-r-2 border-b-2 border-gray-400" />
-                </div>
-              </div>
-            )}
+                  contentEditableRef={contentEditableRef}
+                  onDoubleClick={handleDoubleClick}
+                  onSelect={(elementId) => {
+                    // 클릭 시 선택/해제 토글
+                    if (selectedElement === elementId) {
+                      setSelectedElement(null);
+                    } else {
+                      setSelectedElement(elementId);
+                    }
+                  }}
+                />
+              ) : (
+                <ImageElement
+                  element={element}
+                  isSelected={isSelected}
+                  isOwner={isOwner}
+                  currentUserId={currentUserId}
+                  onDelete={() => {
+                    setDeleteConfirm({
+                      isOpen: true,
+                      elementId: element.id,
+                      elementType: 'image',
+                    });
+                  }}
+                  onResizeStart={handleResizeStart}
+                />
+              )}
             </div>
           );
         })}
@@ -783,65 +669,7 @@ export const BoardCanvas = ({
       ))}
 
       {/* 줌 컨트롤 */}
-      <div className={`absolute bottom-4 right-4 flex flex-col gap-2 ${classes.bg} ${classes.border} rounded-lg shadow-lg p-2`}>
-        <button
-          onClick={() => setScale((prev) => Math.min(2, prev * 1.2))}
-          className={`w-8 h-8 flex items-center justify-center ${classes.textSecondary} hover:bg-gray-50 dark:hover:bg-gray-800 rounded transition-colors`}
-          title="줌인"
-        >
-          +
-        </button>
-        {isEditingZoom ? (
-          <input
-            type="number"
-            min="25"
-            max="200"
-            value={zoomInputValue}
-            onChange={(e) => setZoomInputValue(e.target.value)}
-            onBlur={() => {
-              const numValue = parseInt(zoomInputValue);
-              if (!isNaN(numValue) && numValue >= 25 && numValue <= 200) {
-                setScale(numValue / 100);
-              }
-              setIsEditingZoom(false);
-              setZoomInputValue('');
-            }}
-            onKeyDown={(e) => {
-              if (e.key === 'Enter') {
-                const numValue = parseInt(zoomInputValue);
-                if (!isNaN(numValue) && numValue >= 25 && numValue <= 200) {
-                  setScale(numValue / 100);
-                }
-                setIsEditingZoom(false);
-                setZoomInputValue('');
-              } else if (e.key === 'Escape') {
-                setIsEditingZoom(false);
-                setZoomInputValue('');
-              }
-            }}
-            autoFocus
-            className={`w-12 h-6 text-xs text-center ${classes.borderSecondary} rounded focus:outline-none focus:ring-2 focus:ring-gray-900 dark:focus:ring-gray-100 focus:border-transparent ${classes.text}`}
-          />
-        ) : (
-          <div
-            className={`text-xs text-center ${classes.textSecondary} px-2 cursor-pointer hover:text-gray-900 dark:hover:text-gray-100 transition-colors min-w-[48px]`}
-            onClick={() => {
-              setZoomInputValue(Math.round(scale * 100).toString());
-              setIsEditingZoom(true);
-            }}
-            title="클릭하여 줌 레벨 입력"
-          >
-            {Math.round(scale * 100)}%
-          </div>
-        )}
-        <button
-          onClick={() => setScale((prev) => Math.max(0.25, prev * 0.8))}
-          className={`w-8 h-8 flex items-center justify-center ${classes.textSecondary} hover:bg-gray-50 dark:hover:bg-gray-800 rounded transition-colors`}
-          title="줌아웃"
-        >
-          −
-        </button>
-      </div>
+      <ZoomControls scale={scale} onScaleChange={setScale} />
 
       {/* 삭제 확인 다이얼로그 */}
       <ConfirmDialog

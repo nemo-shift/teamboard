@@ -10,11 +10,12 @@ export interface BoardElementRow {
   id: string;
   board_id: string;
   user_id: string;
-  type: 'note' | 'image';
+  type: 'note' | 'image' | 'text';
   content: string;
   position: { x: number; y: number };
   size: { width: number; height: number };
   color: string | null;
+  text_style?: { [key: string]: any } | null; // JSONB 필드
   created_at: string;
   updated_at: string;
 }
@@ -40,6 +41,7 @@ export function mapElementRowToElement(row: BoardElementRowWithJoins): BoardElem
     position: row.position,
     size: row.size,
     color: row.color || undefined,
+    textStyle: row.text_style || undefined,
     createdAt: row.created_at,
     updatedAt: row.updated_at,
   };
@@ -59,6 +61,7 @@ export function mapElementToInsertRow(
     position: element.position,
     size: element.size,
     color: element.color || null,
+    text_style: element.textStyle || null,
   };
 }
 
@@ -66,9 +69,9 @@ export function mapElementToInsertRow(
  * BoardElement 타입을 데이터베이스 Update용 Row로 변환
  */
 export function mapElementToUpdateRow(
-  element: Partial<Pick<BoardElement, 'content' | 'position' | 'size' | 'color'>>
-): Partial<Pick<BoardElementRow, 'content' | 'position' | 'size' | 'color'>> {
-  const updateRow: Partial<Pick<BoardElementRow, 'content' | 'position' | 'size' | 'color'>> = {};
+  element: Partial<Pick<BoardElement, 'content' | 'position' | 'size' | 'color' | 'textStyle'>>
+): Partial<Pick<BoardElementRow, 'content' | 'position' | 'size' | 'color' | 'text_style'>> {
+  const updateRow: Partial<Pick<BoardElementRow, 'content' | 'position' | 'size' | 'color' | 'text_style'>> = {};
   
   if (element.content !== undefined) {
     updateRow.content = element.content;
@@ -81,6 +84,9 @@ export function mapElementToUpdateRow(
   }
   if (element.color !== undefined) {
     updateRow.color = element.color || null;
+  }
+  if (element.textStyle !== undefined) {
+    updateRow.text_style = element.textStyle || null;
   }
   
   return updateRow;

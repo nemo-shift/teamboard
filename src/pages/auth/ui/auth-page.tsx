@@ -50,15 +50,15 @@ export const AuthPage = () => {
   const { classes } = useTheme();
 
   return (
-    <div className={`min-h-screen ${classes.bg}`}>
+    <div className="min-h-screen bg-[var(--color-base-bg)]">
 
       {/* Main Content */}
       <main className="max-w-lg mx-auto px-6 sm:px-8 lg:px-12 py-12 sm:py-16">
         <div className="text-center mb-10">
-          <h1 className={`text-3xl sm:text-4xl font-bold ${classes.text} mb-3 tracking-tight`}>
+          <h1 className="text-3xl sm:text-4xl font-bold text-[var(--color-text-strong)] mb-3 tracking-tight">
             {mode === 'login' ? '로그인' : '회원가입'}
           </h1>
-          <p className={classes.textSecondary}>
+          <p className="text-[var(--color-text-body)] dark:text-[var(--color-text-secondary)]">
             {mode === 'login'
               ? '계정에 로그인하여 시작하세요'
               : '새 계정을 만들어 아이디어를 공유하세요'}
@@ -66,16 +66,16 @@ export const AuthPage = () => {
         </div>
 
         {/* Auth Card - Glassmorphism */}
-        <div className={`bg-white/80 dark:bg-gray-800/80 backdrop-blur-xl ${classes.border} rounded-2xl shadow-xl p-8 sm:p-10`}>
+        <div className="bg-[var(--color-surface-default)]/95 backdrop-blur-xl border border-[var(--color-border-default)] rounded-2xl shadow-xl p-8 sm:p-10">
           {/* Tab Switcher */}
-          <div className={`flex gap-2 mb-8 p-1 ${classes.bgSecondary} rounded-xl`}>
+          <div className="flex gap-2 mb-8 p-1 bg-[var(--color-surface-subtle)] dark:bg-[var(--color-surface-elevated)] rounded-xl">
             <button
               type="button"
               onClick={() => setMode('login')}
               className={`flex-1 px-4 py-2.5 rounded-lg text-sm font-medium transition-all duration-300 ${
                 mode === 'login'
-                  ? `${classes.bg} ${classes.text} shadow-sm`
-                  : `${classes.textSecondary} hover:text-gray-900 dark:hover:text-gray-100`
+                  ? 'bg-[var(--color-surface-default)] text-[var(--color-text-strong)] shadow-sm'
+                  : 'text-[var(--color-text-body)] dark:text-[var(--color-text-secondary)] hover:text-[var(--color-primary-main)] dark:hover:text-[var(--color-primary-main)]'
               }`}
             >
               로그인
@@ -85,8 +85,8 @@ export const AuthPage = () => {
               onClick={() => setMode('signup')}
               className={`flex-1 px-4 py-2.5 rounded-lg text-sm font-medium transition-all duration-300 ${
                 mode === 'signup'
-                  ? `${classes.bg} ${classes.text} shadow-sm`
-                  : `${classes.textSecondary} hover:text-gray-900 dark:hover:text-gray-100`
+                  ? 'bg-[var(--color-surface-default)] text-[var(--color-text-strong)] shadow-sm'
+                  : 'text-[var(--color-text-body)] dark:text-[var(--color-text-secondary)] hover:text-[var(--color-primary-main)] dark:hover:text-[var(--color-primary-main)]'
               }`}
             >
               회원가입
@@ -111,17 +111,17 @@ export const AuthPage = () => {
           {/* Divider */}
           <div className="relative mb-6">
             <div className="absolute inset-0 flex items-center">
-              <div className={`w-full border-t ${classes.border}`}></div>
+              <div className="w-full border-t border-[var(--color-border-default)]"></div>
             </div>
             <div className="relative flex justify-center text-sm">
-              <span className={`px-3 bg-white/80 dark:bg-gray-800/80 ${classes.textTertiary}`}>또는</span>
+              <span className="px-3 bg-[var(--color-surface-default)] text-[var(--color-text-muted)]">또는</span>
             </div>
           </div>
 
           {/* Success Message */}
           {showResetSuccess && (
-            <div className="mb-4 p-3 bg-green-50 border border-green-200 rounded-lg">
-              <p className="text-sm text-green-600">
+            <div className="mb-4 p-3 bg-[var(--color-success)]/10 border border-[var(--color-success)]/30 rounded-lg">
+              <p className="text-sm text-[var(--color-success)]">
                 비밀번호가 성공적으로 변경되었습니다. 로그인해주세요.
               </p>
             </div>
@@ -129,8 +129,8 @@ export const AuthPage = () => {
 
           {/* Error Message */}
           {error && (
-            <div className="mb-4 p-3 bg-red-50 border border-red-200 rounded-lg">
-              <p className="text-sm text-red-600">{error}</p>
+            <div className="mb-4 p-3 bg-[var(--color-error)]/10 border border-[var(--color-error)]/30 rounded-lg">
+              <p className="text-sm text-[var(--color-error)]">{error}</p>
             </div>
           )}
 
@@ -164,7 +164,7 @@ export const AuthPage = () => {
                 <div className="mt-2 text-right">
                   <Link
                     href="/auth/reset-request"
-                    className="text-sm text-gray-600 hover:text-gray-900 transition-colors"
+                    className="text-sm text-[var(--color-text-body)] dark:text-[var(--color-text-secondary)] hover:text-[var(--color-primary-main)] dark:hover:text-[var(--color-primary-main)] transition-colors"
                   >
                     비밀번호를 잊으셨나요?
                   </Link>
@@ -271,13 +271,13 @@ export const AuthPage = () => {
 
           {/* Terms */}
           {mode === 'signup' && (
-            <p className="mt-6 text-xs text-gray-500 text-center leading-relaxed">
+            <p className="mt-6 text-xs text-[var(--color-text-muted)] text-center leading-relaxed">
               계속 진행하면{' '}
-              <Link href="#" className="underline hover:text-gray-900 transition-colors">
+              <Link href="#" className="underline hover:text-[var(--color-primary-main)] dark:hover:text-[var(--color-primary-main)] transition-colors">
                 이용약관
               </Link>
               과{' '}
-              <Link href="#" className="underline hover:text-gray-900 transition-colors">
+              <Link href="#" className="underline hover:text-[var(--color-primary-main)] dark:hover:text-[var(--color-primary-main)] transition-colors">
                 개인정보처리방침
               </Link>
               에 동의하는 것입니다.
@@ -289,7 +289,7 @@ export const AuthPage = () => {
         <div className="text-center mt-8">
           <Link
             href="/"
-            className="text-sm text-gray-600 hover:text-gray-900 transition-colors inline-flex items-center gap-2"
+            className="text-sm text-[var(--color-text-body)] dark:text-[var(--color-text-secondary)] hover:text-[var(--color-primary-main)] dark:hover:text-[var(--color-primary-main)] transition-colors inline-flex items-center gap-2"
           >
             <svg
               className="w-4 h-4"

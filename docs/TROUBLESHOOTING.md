@@ -7,6 +7,7 @@
 1. [드래그 기능 이벤트 리스너 참조 불일치 문제](#1-드래그-기능-이벤트-리스너-참조-불일치-문제)
 2. [보드 캔버스와 드래그 위젯 이벤트 충돌 문제](#2-보드-캔버스와-드래그-위젯-이벤트-충돌-문제)
 3. [Supabase Realtime DELETE 이벤트가 다른 사용자에게 반영되지 않는 문제](#3-supabase-realtime-delete-이벤트가-다른-사용자에게-반영되지-않는-문제)
+4. [Tailwind CSS v4 다크모드 적용 문제](#4-tailwind-css-v4-다크모드-적용-문제)
 
 ---
 
@@ -14,7 +15,7 @@
 
 ### 문제 상황
 
-**날짜**: 2024년 12월  
+**날짜**: 2025년 12월  
 **파일**: `src/shared/lib/use-draggable.ts`  
 **증상**: 협업 위젯 드래그 기능이 첫 번째 시도에서 약간만 움직이다가 멈추는 현상 발생. 두 번째 시도부터는 정상 작동.
 
@@ -210,7 +211,7 @@ const handleMouseDown = useCallback(
 
 ### 문제 상황
 
-**날짜**: 2024년 12월  
+**날짜**: 2025년 12월  
 **파일**: `src/widgets/board-canvas/ui/board-canvas.tsx`, `src/widgets/collaboration-widget/ui/collaboration-widget.tsx`  
 **증상**: 협업 위젯을 드래그할 때 보드 캔버스의 패닝(panning) 기능이 동시에 작동하여 드래그가 제대로 작동하지 않음.
 
@@ -605,6 +606,252 @@ WHERE n.nspname = 'public'
 - [PostgreSQL REPLICA IDENTITY 문서](https://www.postgresql.org/docs/current/sql-altertable.html#SQL-ALTERTABLE-REPLICA-IDENTITY)
 - [Supabase Realtime 문서](https://supabase.com/docs/guides/realtime)
 - [Supabase Realtime Postgres Changes](https://supabase.com/docs/guides/realtime/postgres-changes)
+
+---
+
+## 4. Tailwind CSS v4 다크모드 적용 문제
+
+### 문제 상황
+
+**날짜**: 2025년 12월 26일  
+**파일**: `app/globals.css`, `app/layout.tsx`, `src/app/providers/theme-provider.tsx`  
+**증상**: 다크모드가 제대로 적용되지 않음. `dark` 클래스가 추가되지 않거나, 헤더만 변경되고 전체 페이지가 변경되지 않음. 스크롤 시 다크모드가 풀리는 현상 발생.
+
+### 증상 상세
+
+1. **dark 클래스가 추가되지 않음**
+   - `ThemeToggle` 버튼을 클릭해도 `document.documentElement`에 `dark` 클래스가 추가되지 않음
+   - Tailwind의 `dark:` 변형이 작동하지 않음
+
+2. **부분적인 다크모드 적용**
+   - 헤더만 다크모드로 변경되고 나머지 페이지는 라이트 모드 유지
+   - 일부 위젯만 다크모드 스타일이 적용됨
+
+3. **스크롤 시 다크모드 해제**
+   - 페이지를 스크롤하면 다크모드가 자동으로 라이트 모드로 변경됨
+
+4. **FOUC (Flash of Unstyled Content)**
+   - 페이지 로드 시 잠깐 라이트 모드가 보이다가 다크모드로 변경되는 깜빡임 현상
+
+### 원인 분석
+
+#### 1단계: Tailwind CSS v4 설정 문제
+
+**핵심 문제 1**: Tailwind CSS v4에서는 기존의 `tailwind.config.ts` 파일이 제거되었고, 다크모드를 활성화하려면 CSS 파일에서 직접 설정해야 함
+
+```css
+/* 문제가 있던 코드 - tailwind.config.ts 사용 시도 */
+// tailwind.config.ts
+export default {
+  darkMode: 'class', // ❌ Tailwind v4에서는 작동하지 않음
+  // ...
+};
+```
+
+**핵심 문제 2**: `@custom-variant dark` 설정이 누락됨
+
+#### 2단계: SSR 및 Hydration 문제
+
+**핵심 문제 3**: Next.js App Router의 SSR 환경에서 클라이언트 사이드 JavaScript가 실행되기 전까지 `dark` 클래스가 적용되지 않음
+
+- `ThemeProvider`의 `useEffect`는 클라이언트에서만 실행됨
+- 서버에서 렌더링된 HTML에는 `dark` 클래스가 없음
+- 클라이언트에서 JavaScript가 로드되어야 `dark` 클래스가 추가됨
+- 이 과정에서 FOUC 발생
+
+**핵심 문제 4**: 모든 컴포넌트에 다크모드 스타일이 적용되지 않음
+
+- 일부 위젯과 페이지에 `useTheme` 훅이 적용되지 않음
+- 하드코딩된 라이트 모드 스타일이 남아있음
+
+### 시행착오 과정
+
+#### 시도 1: tailwind.config.ts 생성
+
+```typescript
+// tailwind.config.ts 생성 시도
+export default {
+  darkMode: 'class',
+  // ...
+};
+```
+
+**결과**: Tailwind CSS v4에서는 `tailwind.config.ts`의 `darkMode` 설정이 작동하지 않음
+
+#### 시도 2: CSS에 @custom-variant 추가
+
+```css
+/* app/globals.css */
+@import "tailwindcss";
+@custom-variant dark (&:where(.dark, .dark *));
+```
+
+**결과**: 부분 성공 - `dark` 클래스는 인식되지만 여전히 FOUC 발생
+
+#### 시도 3: layout.tsx에 inline script 추가
+
+```typescript
+// app/layout.tsx
+<head>
+  <script
+    dangerouslySetInnerHTML={{
+      __html: `
+        (function() {
+          const theme = localStorage.getItem('collaboard-theme');
+          if (theme) {
+            const parsed = JSON.parse(theme);
+            const savedTheme = parsed.state?.theme || 'system';
+            let resolvedTheme = savedTheme;
+            if (savedTheme === 'system') {
+              resolvedTheme = window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light';
+            }
+            document.documentElement.classList.remove('light', 'dark');
+            document.documentElement.classList.add(resolvedTheme);
+          }
+        })();
+      `,
+    }}
+  />
+</head>
+```
+
+**결과**: 성공 - FOUC 문제 해결, 하지만 여전히 일부 컴포넌트에 다크모드 미적용
+
+#### 시도 4: 모든 컴포넌트에 useTheme 훅 적용
+
+- `src/pages/landing/ui/landing-page.tsx`
+- `src/pages/auth/ui/auth-page.tsx`
+- `src/pages/dashboard/ui/dashboard-page.tsx`
+- `src/pages/board/ui/board-page.tsx`
+- 모든 위젯 컴포넌트들
+
+**결과**: 성공 - 전체 페이지에 다크모드 적용 완료
+
+### 최종 해결 방법
+
+#### 1. Tailwind CSS v4 다크모드 설정
+
+```css
+/* app/globals.css */
+@import "tailwindcss";
+
+/* Tailwind CSS v4 다크모드 활성화 */
+@custom-variant dark (&:where(.dark, .dark *));
+```
+
+#### 2. SSR 시 FOUC 방지 (inline script)
+
+```typescript
+// app/layout.tsx
+<html lang="ko" suppressHydrationWarning>
+  <head>
+    <script
+      dangerouslySetInnerHTML={{
+        __html: `
+          (function() {
+            try {
+              const theme = localStorage.getItem('collaboard-theme');
+              if (theme) {
+                const parsed = JSON.parse(theme);
+                const savedTheme = parsed.state?.theme || 'system';
+                let resolvedTheme = savedTheme;
+                if (savedTheme === 'system') {
+                  resolvedTheme = window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light';
+                }
+                document.documentElement.classList.remove('light', 'dark');
+                document.documentElement.classList.add(resolvedTheme);
+              } else {
+                const systemTheme = window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light';
+                document.documentElement.classList.remove('light', 'dark');
+                document.documentElement.classList.add(systemTheme);
+              }
+            } catch (e) {
+              document.documentElement.classList.remove('light', 'dark');
+              document.documentElement.classList.add('light');
+            }
+          })();
+        `,
+      }}
+    />
+  </head>
+  <body className="bg-white dark:bg-gray-900 text-gray-900 dark:text-gray-100">
+    {/* ... */}
+  </body>
+</html>
+```
+
+#### 3. ThemeProvider 초기 마운트 시 강제 적용
+
+```typescript
+// src/app/providers/theme-provider.tsx
+useEffect(() => {
+  setMounted(true);
+  
+  // localStorage에서 직접 읽어서 즉시 적용
+  try {
+    const stored = localStorage.getItem('collaboard-theme');
+    if (stored) {
+      const parsed = JSON.parse(stored);
+      const savedTheme = parsed.state?.theme || 'system';
+      let resolved: 'light' | 'dark';
+      
+      if (savedTheme === 'system') {
+        resolved = window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light';
+      } else {
+        resolved = savedTheme;
+      }
+      
+      const root = document.documentElement;
+      root.classList.remove('light', 'dark');
+      root.classList.add(resolved);
+      
+      // 스토어 상태도 동기화
+      const store = useThemeStore.getState();
+      if (store.resolvedTheme !== resolved) {
+        store.setTheme(savedTheme);
+      }
+    }
+  } catch (e) {
+    // 에러 발생 시 기본값 사용
+    const root = document.documentElement;
+    root.classList.remove('light', 'dark');
+    root.classList.add('light');
+  }
+}, []);
+```
+
+#### 4. 모든 컴포넌트에 useTheme 훅 적용
+
+```typescript
+// 예시: src/pages/landing/ui/landing-page.tsx
+import { useTheme } from '@shared/lib';
+
+export const LandingPage = () => {
+  const { classes } = useTheme();
+  
+  return (
+    <div className={`min-h-screen ${classes.bg}`}>
+      {/* ... */}
+    </div>
+  );
+};
+```
+
+### 관련 파일
+
+- `app/globals.css` - Tailwind CSS v4 다크모드 설정
+- `app/layout.tsx` - SSR 시 FOUC 방지 inline script
+- `src/app/providers/theme-provider.tsx` - 테마 프로바이더 및 초기 마운트 로직
+- `src/shared/lib/use-theme-store.ts` - 테마 상태 관리 (Zustand)
+- `src/shared/lib/use-theme.ts` - 테마 훅 및 공통 클래스 제공
+- `src/shared/ui/components/theme-toggle.tsx` - 테마 토글 버튼
+- 모든 페이지 및 위젯 컴포넌트 - `useTheme` 훅 적용
+
+### 참고 자료
+
+- [Tailwind CSS v4 다크모드 설정](https://www.sujalvanjare.com/blog/fix-dark-class-not-applying-tailwind-css-v4)
+- [Next.js App Router SSR](https://nextjs.org/docs/app/building-your-application/rendering/server-components)
+- [FOUC (Flash of Unstyled Content) 방지](https://web.dev/articles/prevent-layout-shift)
 
 ---
 

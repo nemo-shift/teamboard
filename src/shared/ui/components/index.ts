@@ -1,6 +1,7 @@
 // Shared UI components
 // 공유 UI 컴포넌트
 export { Button } from './button';
+export { BlobCursor } from './blob-cursor';
 export { Card } from './card';
 export { ColorPicker } from './color-picker';
 export { ConfirmDialog } from './confirm-dialog';

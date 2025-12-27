@@ -3,17 +3,106 @@
 /* Tailwind CSS v4 다크모드 활성화 */
 @custom-variant dark (&:where(.dark, .dark *));
 
+/* ============================================
+   CollaBoard Design Tokens - CSS Variables
+   ============================================ */
+
 :root {
-  --background: #ffffff;
-  --foreground: #171717;
+  /* Light Mode Base */
+  --color-base-bg: #FFF9F2;
+  
+  /* Light Mode Surface */
+  --color-surface-default: #FFFFFF;
+  --color-surface-subtle: #FFEFE4;
+  --color-surface-hover: #FFF5EB;
+  
+  /* Light Mode Border */
+  --color-border-default: #E7E2DD;
+  --color-border-subtle: #F5F0EB;
+  --color-border-focus: #FF2E2E;
+  
+  /* Light Mode Primary (Red) */
+  --color-primary-main: #FF2E2E;
+  --color-primary-hover: #E52525;
+  --color-primary-active: #C91E1E;
+  --color-primary-tint: #FFE2E2;
+  --color-primary-light: #FFF0F0;
+  
+  /* Light Mode Secondary */
+  --color-secondary-main: #5B9FFF;
+  --color-secondary-hover: #4A8FE6;
+  --color-secondary-tint: #E6F2FF;
+  
+  /* Light Mode Text */
+  --color-text-strong: #111111;
+  --color-text-body: #3A3A3D;
+  --color-text-muted: #8A8F95;
+  --color-text-disabled: #C4C4C7;
+  
+  /* Light Mode Semantic */
+  --color-success: #10B981;
+  --color-warning: #F59E0B;
+  --color-error: #EF4444;
+  --color-info: #5B9FFF;
+  
+  /* Legacy variables (backward compatibility) */
+  --background: var(--color-surface-default);
+  --foreground: var(--color-text-strong);
 }
 
 :root.dark {
-  --background: #0a0a0a;
-  --foreground: #ededed;
+  /* Dark Mode Base */
+  --color-base-bg: #0A0A0C;
+  
+  /* Dark Mode Surface */
+  --color-surface-default: #131518;
+  --color-surface-elevated: #1C1F24;
+  --color-surface-hover: #1A1D22;
+  
+  /* Dark Mode Border */
+  --color-border-default: #2A2E33;
+  --color-border-subtle: #1F2327;
+  --color-border-focus: #9DFF4C;
+  
+  /* Dark Mode Primary (White) */
+  --color-primary-main: #FFFFFF;
+  --color-primary-hover: #EDEDED;
+  --color-primary-active: #D4D4D4;
+  --color-primary-tint: #2A2E33;
+  
+  /* Dark Mode Accent Lime */
+  --color-accent-lime-main: #9DFF4C;
+  --color-accent-lime-soft: #8EDA3F;
+  --color-accent-lime-shock: #B7FF63;
+  --color-accent-lime-tint: #1A2E0F;
+  
+  /* Dark Mode Accent Blue */
+  --color-accent-blue-main: #4DA6FF;
+  --color-accent-blue-hover: #3D96EF;
+  --color-accent-blue-tint: #0F1F33;
+  
+  /* Dark Mode Text */
+  --color-text-strong: #FFFFFF;
+  --color-text-secondary: #C5CAD1;
+  --color-text-muted: #9AA1A8;
+  --color-text-disabled: #6B7280;
+  
+  /* Dark Mode Semantic */
+  --color-success: #10B981;
+  --color-warning: #F59E0B;
+  --color-error: #EF4444;
+  --color-info: #4DA6FF;
+  
+  /* Legacy variables (backward compatibility) */
+  --background: var(--color-base-bg);
+  --foreground: var(--color-text-strong);
 }
 
 @theme inline {
+  /* TailwindCSS v4는 @theme에서 직접 색상 값을 정의하거나 CSS 변수를 참조할 수 있습니다 */
+  /* CSS 변수는 이미 :root에 정의되어 있으므로, 여기서는 TailwindCSS가 인식할 수 있도록 설정 */
+  
+  /* Legacy */
   --color-background: var(--background);
   --color-foreground: var(--foreground);
   --font-sans: var(--font-geist-sans);
@@ -21,8 +110,8 @@
 }
 
 body {
-  background: var(--background);
-  color: var(--foreground);
+  background: var(--color-base-bg);
+  color: var(--color-text-strong);
   font-family: Arial, Helvetica, sans-serif;
   transition: background-color 0.2s ease, color 0.2s ease;
 }
@@ -75,3 +164,4 @@ input[type="radio"]:checked {
 .animate-shake {
   animation: shake 0.5s ease-in-out;
 }
+

@@ -1,10 +1,11 @@
 'use client';
 
-import { useState, useRef, useEffect } from 'react';
+import { useState } from 'react';
 import Link from 'next/link';
 import { Button, InviteModal, Tooltip } from '@shared/ui';
 import { BoardSettingsModal } from './board-settings-modal';
-import type { CursorPosition } from '@entities/element';
+import { useEditableField } from '@features/board';
+import { useTheme } from '@shared/lib';
 
 interface BoardToolbarProps {
   boardName?: string;
@@ -12,8 +13,8 @@ interface BoardToolbarProps {
   boardId?: string;
   inviteCode?: string;
   isPublic?: boolean;
-  addMode: 'note' | 'image' | null;
-  onAddModeChange: (mode: 'note' | 'image' | null) => void;
+  addMode: 'note' | 'image' | 'text' | null;
+  onAddModeChange: (mode: 'note' | 'image' | 'text' | null) => void;
   onImageButtonClick: () => void;
   fileInputRef: React.RefObject<HTMLInputElement | null>;
   onFileSelect: (e: React.ChangeEvent<HTMLInputElement>) => void;
@@ -35,110 +36,45 @@ export const BoardToolbar = ({
   onBoardUpdate,
   isOwner = false,
 }: BoardToolbarProps) => {
-  const [isEditingName, setIsEditingName] = useState(false);
-  const [isEditingDescription, setIsEditingDescription] = useState(false);
-  const [editedName, setEditedName] = useState(boardName);
-  const [editedDescription, setEditedDescription] = useState(boardDescription || '');
-  const [isSaving, setIsSaving] = useState(false);
   const [isInviteModalOpen, setIsInviteModalOpen] = useState(false);
   const [isSettingsModalOpen, setIsSettingsModalOpen] = useState(false);
-  const nameInputRef = useRef<HTMLInputElement>(null);
-  const descriptionInputRef = useRef<HTMLInputElement>(null);
+
+  // 보드 이름 편집 훅
+  const nameField = useEditableField({
+    initialValue: boardName,
+    onSave: async (value) => {
+      if (!onBoardUpdate || !isOwner) return;
+      await onBoardUpdate({ name: value });
+    },
+    enabled: !!onBoardUpdate && isOwner,
+  });
+
+  // 보드 설명 편집 훅
+  const descriptionField = useEditableField({
+    initialValue: boardDescription || '',
+    onSave: async (value) => {
+      if (!onBoardUpdate || !isOwner) return;
+      await onBoardUpdate({ description: value || undefined });
+    },
+    enabled: !!onBoardUpdate && isOwner,
+  });
 
   // 초대 링크 생성
   const inviteLink = inviteCode
     ? `${typeof window !== 'undefined' ? window.location.origin : ''}/board/invite/${inviteCode}`
     : '';
 
-  // boardName이나 boardDescription이 변경되면 로컬 상태 업데이트
-  useEffect(() => {
-    setEditedName(boardName);
-  }, [boardName]);
-
-  useEffect(() => {
-    setEditedDescription(boardDescription || '');
-  }, [boardDescription]);
-
-  // 편집 모드 진입 시 포커스
-  useEffect(() => {
-    if (isEditingName && nameInputRef.current) {
-      nameInputRef.current.focus();
-      nameInputRef.current.select();
-    }
-  }, [isEditingName]);
-
-  useEffect(() => {
-    if (isEditingDescription && descriptionInputRef.current) {
-      descriptionInputRef.current.focus();
-    }
-  }, [isEditingDescription]);
-
-  const handleSaveName = async () => {
-    if (!onBoardUpdate || !isOwner) return;
-    
-    const trimmedName = editedName.trim();
-    if (!trimmedName) {
-      setEditedName(boardName);
-      setIsEditingName(false);
-      return;
-    }
-
-    if (trimmedName === boardName) {
-      setIsEditingName(false);
-      return;
-    }
-
-    try {
-      setIsSaving(true);
-      await onBoardUpdate({ name: trimmedName });
-      setIsEditingName(false);
-    } catch (error) {
-      console.error('Failed to update board name:', error);
-      setEditedName(boardName); // 롤백
-    } finally {
-      setIsSaving(false);
-    }
-  };
-
-  const handleSaveDescription = async () => {
-    if (!onBoardUpdate || !isOwner) return;
-
-    const trimmedDescription = editedDescription.trim();
-    if (trimmedDescription === (boardDescription || '')) {
-      setIsEditingDescription(false);
-      return;
-    }
-
-    try {
-      setIsSaving(true);
-      await onBoardUpdate({ description: trimmedDescription || undefined });
-      setIsEditingDescription(false);
-    } catch (error) {
-      console.error('Failed to update board description:', error);
-      setEditedDescription(boardDescription || ''); // 롤백
-    } finally {
-      setIsSaving(false);
-    }
-  };
-
-  const handleCancelName = () => {
-    setEditedName(boardName);
-    setIsEditingName(false);
-  };
-
-  const handleCancelDescription = () => {
-    setEditedDescription(boardDescription || '');
-    setIsEditingDescription(false);
-  };
+  const isSaving = nameField.isSaving || descriptionField.isSaving;
+  const { classes } = useTheme();
 
   return (
-    <div className="flex flex-col border-b border-gray-200 bg-white">
+    <div className={`flex flex-col border-b ${classes.border} ${classes.bgSurface}`}>
       <div className="flex items-center justify-between px-6 py-3">
         <div className="flex items-center gap-4 flex-1 min-w-0">
           {/* 대시보드 링크 */}
           <Link
             href="/dashboard"
-            className="flex items-center gap-2 text-gray-600 hover:text-gray-900 transition-colors flex-shrink-0"
+            className={`flex items-center gap-2 ${classes.textMuted} hover:opacity-80 transition-colors flex-shrink-0`}
             title="대시보드로 이동"
           >
             <svg
@@ -156,42 +92,42 @@ export const BoardToolbar = ({
             </svg>
             <span className="text-sm font-medium">대시보드</span>
           </Link>
-          <div className="w-px h-6 bg-gray-300 flex-shrink-0"></div>
+          <div className={`w-px h-6 ${classes.borderSubtle} flex-shrink-0`}></div>
           
           {/* 보드 이름과 설명 (같은 줄에 배치) */}
           <div className="flex items-center gap-3 min-w-0 flex-1">
             {/* 보드 이름 */}
             <div className="flex items-center gap-2 min-w-0">
-              {isEditingName && isOwner ? (
+              {nameField.isEditing && isOwner ? (
                 <input
-                  ref={nameInputRef}
+                  ref={nameField.inputRef as React.RefObject<HTMLInputElement>}
                   type="text"
-                  value={editedName}
-                  onChange={(e) => setEditedName(e.target.value)}
-                  onBlur={handleSaveName}
+                  value={nameField.editedValue}
+                  onChange={(e) => nameField.setEditedValue(e.target.value)}
+                  onBlur={nameField.handleSave}
                   onKeyDown={(e) => {
                     if (e.key === 'Enter') {
                       e.preventDefault();
-                      handleSaveName();
+                      nameField.handleSave();
                     } else if (e.key === 'Escape') {
-                      handleCancelName();
+                      nameField.handleCancel();
                     }
                   }}
                   disabled={isSaving}
-                  className="text-lg font-semibold text-gray-900 border border-gray-300 rounded px-2 py-1 focus:outline-none focus:ring-2 focus:ring-gray-900 focus:border-transparent min-w-0"
+                  className={`text-lg font-semibold ${classes.text} ${classes.border} rounded px-2 py-1 focus:outline-none focus:ring-2 ${classes.borderFocus} focus:border-transparent min-w-0 ${classes.bg}`}
                 />
               ) : (
                 <div className="flex items-center gap-2">
                   <h1 
-                    className="text-lg font-semibold text-gray-900 truncate"
+                    className={`text-lg font-semibold ${classes.text} truncate`}
                     title={boardName}
                   >
                     {boardName}
                   </h1>
                   {isOwner && (
                     <button
-                      onClick={() => setIsEditingName(true)}
-                      className="flex-shrink-0 p-1 text-gray-400 hover:text-gray-600 transition-colors"
+                      onClick={() => nameField.setIsEditing(true)}
+                      className={`flex-shrink-0 p-1 ${classes.textMuted} hover:opacity-80 transition-colors`}
                       title="보드 이름 편집"
                     >
                       <svg
@@ -214,37 +150,37 @@ export const BoardToolbar = ({
             </div>
 
             {/* 보드 설명 (이름 옆에 배치) */}
-            {(boardDescription || isEditingDescription || isOwner) && (
+            {(boardDescription || descriptionField.isEditing || isOwner) && (
               <div className="flex items-center gap-2">
-                <span className="text-gray-400">•</span>
-                {isEditingDescription && isOwner ? (
+                <span className={classes.textMuted}>•</span>
+                {descriptionField.isEditing && isOwner ? (
                   <input
-                    ref={descriptionInputRef}
+                    ref={descriptionField.inputRef as React.RefObject<HTMLInputElement>}
                     type="text"
-                    value={editedDescription}
-                    onChange={(e) => setEditedDescription(e.target.value)}
-                    onBlur={handleSaveDescription}
+                    value={descriptionField.editedValue}
+                    onChange={(e) => descriptionField.setEditedValue(e.target.value)}
+                    onBlur={descriptionField.handleSave}
                     onKeyDown={(e) => {
                       if (e.key === 'Enter') {
                         e.preventDefault();
-                        handleSaveDescription();
+                        descriptionField.handleSave();
                       } else if (e.key === 'Escape') {
-                        handleCancelDescription();
+                        descriptionField.handleCancel();
                       }
                     }}
                     disabled={isSaving}
                     placeholder="보드 설명을 입력하세요"
-                    className="text-sm text-gray-600 border border-gray-300 rounded px-2 py-1 focus:outline-none focus:ring-2 focus:ring-gray-900 focus:border-transparent min-w-[200px] max-w-md"
+                    className={`text-sm ${classes.textBody} rounded px-2 py-1 focus:outline-none focus:ring-2 ${classes.borderFocus} focus:border-transparent min-w-[200px] max-w-md border ${classes.border} ${classes.bg}`}
                   />
                 ) : (
                   <div className="flex items-center gap-2">
-                    <p className="text-sm text-gray-600">
+                    <p className={`text-sm ${classes.textBody}`}>
                       {boardDescription || (isOwner ? '보드 설명을 추가하세요' : '')}
                     </p>
                     {isOwner && (
                       <button
-                        onClick={() => setIsEditingDescription(true)}
-                        className="flex-shrink-0 p-1 text-gray-400 hover:text-gray-600 transition-colors"
+                        onClick={() => descriptionField.setIsEditing(true)}
+                        className={`flex-shrink-0 p-1 ${classes.textMuted} hover:opacity-80 transition-colors`}
                         title="보드 설명 편집"
                       >
                         <svg
@@ -271,13 +207,13 @@ export const BoardToolbar = ({
 
         {/* 도구 모음 */}
         <div className="flex items-center gap-2">
-          <div className="flex items-center gap-1 border-r border-gray-200 pr-2 mr-2">
+          <div className={`flex items-center gap-1 border-r ${classes.border} pr-2 mr-2`}>
             <button
               onClick={() => onAddModeChange(addMode === 'note' ? null : 'note')}
-              className={`px-3 py-1.5 rounded-md text-sm font-medium transition-colors flex items-center gap-2 ${
+              className={`px-3 py-1.5 rounded-md text-sm font-medium transition-colors flex items-center gap-2 border ${
                 addMode === 'note'
-                  ? 'bg-gray-900 text-white'
-                  : 'bg-white text-gray-700 hover:bg-gray-50 border border-gray-200'
+                  ? `${classes.primary} text-white dark:text-[#1a1a1a]`
+                  : `${classes.bgSurface} ${classes.textBody} ${classes.border} hover:bg-[var(--color-surface-hover)]`
               }`}
               title="포스트잇 추가"
             >
@@ -298,10 +234,10 @@ export const BoardToolbar = ({
             </button>
             <button
               onClick={onImageButtonClick}
-              className={`px-3 py-1.5 rounded-md text-sm font-medium transition-colors flex items-center gap-2 ${
+              className={`px-3 py-1.5 rounded-md text-sm font-medium transition-colors flex items-center gap-2 border ${
                 addMode === 'image'
-                  ? 'bg-gray-900 text-white'
-                  : 'bg-white text-gray-700 hover:bg-gray-50 border border-gray-200'
+                  ? `${classes.primary} text-white dark:text-[#1a1a1a]`
+                  : `${classes.bgSurface} ${classes.textBody} ${classes.border} hover:bg-[var(--color-surface-hover)]`
               }`}
               title="이미지 업로드"
             >
@@ -327,6 +263,30 @@ export const BoardToolbar = ({
               className="hidden"
               onChange={onFileSelect}
             />
+            <button
+              onClick={() => onAddModeChange(addMode === 'text' ? null : 'text')}
+              className={`px-3 py-1.5 rounded-md text-sm font-medium transition-colors flex items-center gap-2 border ${
+                addMode === 'text'
+                  ? `${classes.primary} text-white dark:text-[#1a1a1a]`
+                  : `${classes.bgSurface} ${classes.textBody} ${classes.border} hover:bg-[var(--color-surface-hover)]`
+              }`}
+              title="텍스트 추가"
+            >
+              <svg
+                className="w-4 h-4"
+                fill="none"
+                stroke="currentColor"
+                viewBox="0 0 24 24"
+              >
+                <path
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  strokeWidth={2}
+                  d="M4 6h16M4 12h16M4 18h7"
+                />
+              </svg>
+              텍스트
+            </button>
           </div>
 
           <Tooltip

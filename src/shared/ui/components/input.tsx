@@ -21,20 +21,20 @@ export const Input = ({
       {label && (
         <label
           htmlFor={inputId}
-          className="block text-sm font-medium text-gray-700 mb-1.5"
+          className="block text-sm font-medium text-[var(--color-text-body)] dark:text-[var(--color-text-secondary)] mb-1.5"
         >
           {label}
         </label>
       )}
       <input
         id={inputId}
-        className={`w-full px-4 py-3 border border-gray-300 rounded-xl bg-white text-gray-900 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-gray-900 focus:border-transparent transition-all duration-300 shadow-sm hover:shadow-md focus:shadow-lg ${
-          error ? 'border-red-500 focus:ring-red-500' : ''
+        className={`w-full px-4 py-3 border border-[var(--color-border-default)] rounded-xl bg-[var(--color-surface-default)] text-[var(--color-text-strong)] placeholder-[var(--color-text-muted)] focus:outline-none focus:ring-2 focus:ring-[var(--color-border-focus)] focus:border-[var(--color-border-focus)] transition-all duration-300 shadow-sm hover:shadow-md hover:border-[var(--color-border-focus)]/50 focus:shadow-lg ${
+          error ? 'border-[var(--color-error)] focus:ring-[var(--color-error)]' : ''
         } ${className}`}
         {...props}
       />
       {error && (
-        <p className="mt-1 text-sm text-red-600">{error}</p>
+        <p className="mt-1 text-sm text-[var(--color-error)]">{error}</p>
       )}
     </div>
   );

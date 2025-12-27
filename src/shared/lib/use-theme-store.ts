@@ -57,7 +57,7 @@ export const useThemeStore = create<ThemeState>()(
       };
     },
     {
-      name: 'vibe-board-theme',
+      name: 'collaboard-theme',
       storage: createJSONStorage(() => localStorage),
       partialize: (state) => ({ theme: state.theme }), // resolvedTheme은 저장하지 않음 (계산값)
       onRehydrateStorage: () => (state) => {

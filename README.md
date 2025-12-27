@@ -1,12 +1,24 @@
-# Vibe Board
+# CollaBoard
 
 아이디어를 실시간으로 공유하고 함께 발전시키는 미니멀리스트 온라인 화이트보드
+
+## 주요 기능
+
+- ✅ **실시간 협업**: 여러 사용자가 동시에 작업하고 변경사항이 즉시 반영
+- ✅ **다크모드**: 라이트/다크 모드 전환 지원 (Tailwind CSS v4)
+- ✅ **포스트잇**: 다양한 색상의 포스트잇 생성, 편집, 삭제
+- ✅ **텍스트 요소**: 리치 텍스트 에디터 (굵게, 기울임, 밑줄, 취소선, 헤딩, 색상, 하이라이트)
+- ✅ **이미지 업로드**: Supabase Storage를 이용한 이미지 업로드 및 관리
+- ✅ **보드 관리**: 공개/비공개 보드 설정, 초대 링크 생성
+- ✅ **실시간 커서 추적**: 다른 사용자의 커서 위치를 실시간으로 확인
+- ✅ **Blob Cursor**: 마우스를 따라다니는 부드러운 blob 형태의 커서 (페이지별 제어 가능)
 
 ## 기술 스택
 
 - **Framework**: Next.js 16 (App Router)
 - **Language**: TypeScript
 - **Styling**: TailwindCSS v4
+- **State Management**: Zustand
 - **Backend**: Supabase (Auth, PostgreSQL, Realtime, Storage)
 - **Architecture**: Feature-Sliced Design (FSD)
 
@@ -23,6 +35,13 @@ src/
 ├── entities/     # Entities Layer (비즈니스 엔티티)
 └── shared/       # Shared Layer (공유 리소스)
 ```
+
+## 문서
+
+- [FSD 컨벤션](./docs/FSD_CONVENTIONS.md) - 프로젝트 아키텍처 가이드
+- [FSD 코딩 가이드](./docs/FSD_CODING_GUIDE.md) - 코딩 규칙 및 예시
+- [트러블슈팅](./docs/TROUBLESHOOTING.md) - 개발 중 발생한 문제와 해결 방법
+- [MCP 설정](./docs/MCP_SETUP.md) - Model Context Protocol 설정 가이드
 
 ## 개발 가이드
 

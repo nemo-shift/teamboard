@@ -2,12 +2,13 @@
 
 import { useState, useEffect } from 'react';
 import { useTheme } from '@shared/lib';
+import { DemoPostit, CursorIndicator } from './components';
 
 export const InteractiveDemoSection = () => {
   const { classes } = useTheme();
   const [hoveredNote, setHoveredNote] = useState<number | null>(null);
   const [cursorPosition, setCursorPosition] = useState({ x: 300, y: 200 });
-  const [showNewNote, setShowNewNote] = useState(false);
+  const [showNewNote, setShowNewNote] = useState(true); // 처음부터 보이도록 변경
 
   // 커서 애니메이션
   useEffect(() => {
@@ -35,107 +36,137 @@ export const InteractiveDemoSection = () => {
         <h2 className={`text-3xl sm:text-4xl lg:text-5xl font-bold ${classes.text} text-center mb-4 tracking-tight`}>
           실제 화이트보드처럼
         </h2>
-        <p className={`text-lg sm:text-xl ${classes.textSecondary} text-center mb-12 sm:mb-16 max-w-2xl mx-auto`}>
+        <p className={`text-lg sm:text-xl ${classes.textMuted} text-center mb-12 sm:mb-16 max-w-2xl mx-auto`}>
           드래그하고, 포스트잇을 추가하고, 이미지를 업로드하세요
         </p>
         
         {/* Whiteboard Demo */}
-        <div className={`relative ${classes.bg} rounded-2xl ${classes.border} shadow-2xl overflow-hidden`}>
-          {/* Grid Background */}
+        <div className={`relative ${classes.bg} rounded-2xl ${classes.border} shadow-2xl dark:shadow-[0_20px_60px_rgba(0,0,0,0.5)] overflow-hidden`}>
+          <div className={`relative min-h-[500px] p-8 lg:p-12 ${classes.bgSurfaceSubtle}`}>
+            {/* Grid Background - 라이트모드용 검은색 그리드 */}
           <div
-            className="absolute inset-0 opacity-[0.03] dark:opacity-[0.05]"
+              className="absolute inset-0 opacity-[0.06] dark:opacity-0"
             style={{
               backgroundImage: `
                 linear-gradient(to right, black 1px, transparent 1px),
                 linear-gradient(to bottom, black 1px, transparent 1px)
               `,
               backgroundSize: '40px 40px',
+                zIndex: 0,
             }}
           />
-          
-          <div className={`relative min-h-[500px] p-8 lg:p-12 ${classes.bgSecondary}`}>
-            {/* Multiple Post-it Notes */}
+            {/* 다크모드용 밝은 그리드 */}
             <div
-              className={`absolute top-12 left-12 w-40 h-40 ${classes.bg} rounded-xl ${classes.border} shadow-xl transform rotate-[-4deg] p-4 transition-all duration-300 ${
-                hoveredNote === 1
-                  ? 'rotate-[-2deg] shadow-2xl scale-105'
-                  : 'hover:rotate-[-2deg] hover:shadow-2xl'
-              }`}
+              className="absolute inset-0 opacity-0 dark:opacity-[0.15]"
+              style={{
+                backgroundImage: `
+                  linear-gradient(to right, white 1px, transparent 1px),
+                  linear-gradient(to bottom, white 1px, transparent 1px)
+                `,
+                backgroundSize: '40px 40px',
+                zIndex: 0,
+              }}
+            />
+            {/* Multiple Post-it Notes */}
+            <DemoPostit
+              id={1}
+              title="💡 아이디어"
+              content={
+                <>
+                  새로운 기능을
+                  <br />
+                  추가해보세요
+                </>
+              }
+              position={{ top: '4rem', left: '4rem' }}
+              size={{ width: '10rem', height: '10rem' }}
+              rotation={-4}
+              hoveredNote={hoveredNote}
               onMouseEnter={() => setHoveredNote(1)}
               onMouseLeave={() => setHoveredNote(null)}
-            >
-              <div className={`text-sm font-semibold ${classes.text} mb-2`}>
-                💡 아이디어
-              </div>
-              <div className={`text-xs ${classes.textSecondary} leading-relaxed`}>
-                새로운 기능을
-                <br />
-                추가해보세요
-              </div>
-            </div>
+              leadingRelaxed
+            />
 
-            <div
-              className={`absolute top-20 right-16 w-36 h-36 ${classes.bgSecondary} rounded-xl ${classes.border} shadow-xl transform rotate-[3deg] p-4 transition-all duration-300 ${
-                hoveredNote === 2
-                  ? 'rotate-[1deg] shadow-2xl scale-105'
-                  : 'hover:rotate-[1deg] hover:shadow-2xl'
-              }`}
+            <DemoPostit
+              id={2}
+              title="📋 할 일"
+              content={
+                <>
+                  • 작업 1
+                  <br />• 작업 2
+                  <br />• 작업 3
+                </>
+              }
+              position={{ top: '4rem', right: '6rem' }}
+              size={{ width: '9rem', height: '9rem' }}
+              rotation={3}
+              hoveredNote={hoveredNote}
               onMouseEnter={() => setHoveredNote(2)}
               onMouseLeave={() => setHoveredNote(null)}
-            >
-              <div className={`text-sm font-semibold ${classes.text} mb-2`}>
-                📋 할 일
-              </div>
-              <div className={`text-xs ${classes.textSecondary}`}>
-                • 작업 1
-                <br />• 작업 2
-                <br />• 작업 3
-              </div>
-            </div>
+            />
 
-            <div
-              className={`absolute bottom-24 left-20 w-44 h-40 ${classes.bg} rounded-xl ${classes.border} shadow-xl transform rotate-[2deg] p-4 transition-all duration-300 ${
-                hoveredNote === 3
-                  ? 'rotate-[4deg] shadow-2xl scale-105'
-                  : 'hover:rotate-[4deg] hover:shadow-2xl'
-              }`}
-              onMouseEnter={() => setHoveredNote(3)}
-              onMouseLeave={() => setHoveredNote(null)}
-            >
-              <div className={`text-sm font-semibold ${classes.text} mb-2`}>
-                🎯 목표
-              </div>
-              <div className={`text-xs ${classes.textSecondary} leading-relaxed`}>
+            <DemoPostit
+              id={3}
+              title="🎯 목표"
+              content={
+                <>
                 프로젝트의
                 <br />
                 최종 목표를
                 <br />
                 정리하세요
-              </div>
-            </div>
+                </>
+              }
+              position={{ bottom: '7rem', left: '6rem' }}
+              size={{ width: '11rem', height: '10rem' }}
+              rotation={2}
+              hoveredNote={hoveredNote}
+              onMouseEnter={() => setHoveredNote(3)}
+              onMouseLeave={() => setHoveredNote(null)}
+              leadingRelaxed
+            />
+
+            {/* 가운데 포스트잇 추가 */}
+            <DemoPostit
+              id={4}
+              title="📝 메모"
+              content={
+                <>
+                  중요한 내용을
+                  <br />
+                  기록하세요
+                </>
+              }
+              position={{ top: '50%', left: '50%' }}
+              size={{ width: '9rem', height: '9rem' }}
+              rotation={-2}
+              hoveredNote={hoveredNote}
+              onMouseEnter={() => setHoveredNote(4)}
+              onMouseLeave={() => setHoveredNote(null)}
+              transform="translate(-50%, -50%) rotate(-2deg)"
+            />
 
             {/* 새 포스트잇 애니메이션 */}
             {showNewNote && (
-              <div
-                className={`absolute top-32 right-32 w-32 h-32 ${classes.bg} rounded-xl ${classes.border} shadow-xl p-3 animate-in fade-in slide-in-from-bottom-4 duration-500`}
-                style={{
-                  transform: 'rotate(5deg)',
-                }}
-              >
-                <div className={`text-xs font-semibold ${classes.text} mb-1`}>
-                  ✨ 새 아이디어
-                </div>
-                <div className={`text-xs ${classes.textSecondary}`}>
-                  실시간으로 추가됨
-                </div>
-              </div>
+              <DemoPostit
+                id={5}
+                title="✨ 새 아이디어"
+                content="실시간으로 추가됨"
+                position={{ top: '11rem', right: '7rem' }}
+                size={{ width: '8rem', height: '8rem' }}
+                rotation={5}
+                hoveredNote={null}
+                onMouseEnter={() => {}}
+                onMouseLeave={() => {}}
+                className="animate-in fade-in slide-in-from-bottom-4 duration-500"
+              />
             )}
 
             {/* Image Placeholder */}
-            <div className={`absolute bottom-16 right-20 w-48 h-36 ${classes.bgTertiary} rounded-xl ${classes.border} shadow-xl flex items-center justify-center`}>
+            <div className="absolute bottom-20 right-24 w-48 h-36 bg-[#F5F5F0] dark:bg-[#2A2A2A] rounded-sm border border-[#E0E0E0] dark:border-[#404040] shadow-xl dark:shadow-[0_10px_30px_rgba(0,0,0,0.6)] flex items-center justify-center" style={{ zIndex: 10 }}>
               <div className="text-center">
                 <svg
-                  className={`w-12 h-12 mx-auto ${classes.textTertiary} mb-2`}
+                  className={`w-12 h-12 mx-auto ${classes.textMuted} mb-2`}
                   fill="none"
                   stroke="currentColor"
                   viewBox="0 0 24 24"
@@ -147,14 +178,14 @@ export const InteractiveDemoSection = () => {
                     d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z"
                   />
                 </svg>
-                <span className={`text-sm ${classes.textTertiary} font-medium`}>이미지 업로드</span>
+                <span className={`text-sm ${classes.textMuted} font-medium`}>이미지 업로드</span>
               </div>
             </div>
 
             {/* Connection Lines */}
             <svg
               className="absolute inset-0 pointer-events-none"
-              style={{ zIndex: 0 }}
+              style={{ zIndex: 1 }}
             >
               <line
                 x1="100"
@@ -178,24 +209,26 @@ export const InteractiveDemoSection = () => {
               />
             </svg>
 
-            {/* Cursor Indicators (showing collaboration) - 애니메이션 */}
-            <div
-              className="absolute top-32 left-1/3 transition-all duration-1000 ease-out"
-              style={{
-                transform: `translate(${cursorPosition.x - 300}px, ${cursorPosition.y - 200}px)`,
-              }}
-            >
-              <div className={`flex items-center gap-2 ${classes.bg}/80 backdrop-blur-sm px-2 py-1 rounded-full shadow-sm ${classes.border}`}>
-                <div className="w-3 h-3 bg-blue-500 rounded-full animate-pulse" />
-                <span className={`text-xs ${classes.textSecondary} font-medium`}>팀원 1</span>
-              </div>
-            </div>
-            <div className="absolute bottom-32 right-1/4">
-              <div className={`flex items-center gap-2 ${classes.bg}/80 backdrop-blur-sm px-2 py-1 rounded-full shadow-sm ${classes.border}`}>
-                <div className="w-3 h-3 bg-green-500 rounded-full animate-pulse" style={{ animationDelay: '0.5s' }} />
-                <span className={`text-xs ${classes.textSecondary} font-medium`}>팀원 2</span>
-              </div>
-            </div>
+            {/* Cursor Indicators (showing collaboration) */}
+            <CursorIndicator
+              name="팀원 1"
+              color="#3b82f6"
+              position={{ top: '135px', left: '300px' }}
+              transform="translate(-6px, -6px)"
+            />
+            <CursorIndicator
+              name="팀원 2"
+              color="#10b981"
+              position={{ bottom: '8rem', right: '25%' }}
+              animationDelay="0.5s"
+            />
+            <CursorIndicator
+              name="팀원 3"
+              color="#a855f7"
+              position={{ top: '50%', left: '50%' }}
+              transform="translate(-50%, calc(-50% - 120px))"
+              animationDelay="1s"
+            />
           </div>
         </div>
       </div>

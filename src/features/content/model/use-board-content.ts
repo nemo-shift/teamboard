@@ -4,7 +4,7 @@ import { useState, useCallback, useEffect, useRef, useMemo } from 'react';
 import type { BoardElement } from '@entities/element';
 // import { mockElements } from './mock-elements'; // 더미 데이터 주석 처리
 import { calculateImageSize } from '../lib/calculate-image-size';
-import { DEFAULT_NOTE_COLOR, DEFAULT_NOTE_SIZE } from '../lib/constants';
+import { DEFAULT_NOTE_COLOR, DEFAULT_NOTE_SIZE, DEFAULT_TEXT_SIZE, REALTIME_IGNORE_TIMEOUT, REALTIME_DRAG_IGNORE_TIMEOUT } from '../lib/constants';
 import {
   getBoardElements,
   createBoardElement,
@@ -35,9 +35,11 @@ interface UseBoardContentReturn {
     onElementResize: (elementId: string, size: { width: number; height: number }) => void;
     onElementUpdate: (elementId: string, content: string) => void;
     onElementColorChange: (elementId: string, color: string) => void;
+    onElementStyleChange: (elementId: string, style: any) => void;
     onElementDelete: (elementId: string) => void;
     onAddNote: (position: { x: number; y: number }) => void;
     onAddImage: (position: { x: number; y: number }, file: File) => void;
+    onAddText: (position: { x: number; y: number }) => void;
   };
 }
 
@@ -117,7 +119,7 @@ export const useBoardContent = ({
         
         // 자신이 삭제한 경우에만 recentlyUpdatedRef 확인
         const recentlyUpdated = recentlyUpdatedRef.current.get(deletedId);
-        if (recentlyUpdated && Date.now() - recentlyUpdated < 1000) {
+        if (recentlyUpdated && Date.now() - recentlyUpdated < REALTIME_IGNORE_TIMEOUT) {
           // 자신이 최근에 삭제한 요소는 무시 (optimistic update와 중복 방지)
           return true;
         }
@@ -143,7 +145,7 @@ export const useBoardContent = ({
         
         // 드래그 중인 요소 확인
         const dragStartTime = draggingElementsRef.current.get(elementId);
-        if (dragStartTime && Date.now() - dragStartTime < 3000) {
+        if (dragStartTime && Date.now() - dragStartTime < REALTIME_DRAG_IGNORE_TIMEOUT) {
           return true;
         }
         if (dragStartTime) {
@@ -152,7 +154,7 @@ export const useBoardContent = ({
         
         // 최근 업데이트한 요소 확인
         const recentlyUpdated = recentlyUpdatedRef.current.get(elementId);
-        if (recentlyUpdated && Date.now() - recentlyUpdated < 1000) {
+        if (recentlyUpdated && Date.now() - recentlyUpdated < REALTIME_IGNORE_TIMEOUT) {
           return true;
         }
       }
@@ -519,6 +521,60 @@ export const useBoardContent = ({
     [boardId, currentUserId]
   );
 
+  const handleAddText = useCallback(
+    async (position: { x: number; y: number }) => {
+      try {
+        const newElement = await createBoardElement({
+          boardId,
+          userId: currentUserId,
+          type: 'text',
+          content: '',
+          position,
+          size: DEFAULT_TEXT_SIZE,
+          textStyle: {
+            fontSize: 24,
+            fontWeight: 'normal',
+            fontStyle: 'normal',
+            textDecoration: 'none',
+            heading: 'p',
+          },
+        });
+        setElements((prev) => [...prev, newElement]);
+      } catch (error) {
+        console.error('Failed to create text:', error);
+      }
+    },
+    [boardId, currentUserId]
+  );
+
+  const handleElementStyleChange = useCallback(
+    async (elementId: string, style: any) => {
+      const element = elements.find((el) => el.id === elementId);
+      if (!element) return;
+
+      // 권한 체크
+      const canEdit = isOwner || element.userId === currentUserId;
+      if (!canEdit) {
+        if (onPermissionDenied) {
+          onPermissionDenied();
+        }
+        return;
+      }
+
+      try {
+        await updateBoardElement(elementId, { textStyle: style });
+        setElements((prev) =>
+          prev.map((el) =>
+            el.id === elementId ? { ...el, textStyle: style } : el
+          )
+        );
+      } catch (error) {
+        console.error('Failed to update text style:', error);
+      }
+    },
+    [elements, currentUserId, isOwner, onPermissionDenied]
+  );
+
   const handleAddImage = useCallback(
     async (position: { x: number; y: number }, file: File) => {
       // 이미지 크기 계산
@@ -582,9 +638,11 @@ export const useBoardContent = ({
       onElementResize: handleElementResize,
       onElementUpdate: handleElementUpdate,
       onElementColorChange: handleElementColorChange,
+      onElementStyleChange: handleElementStyleChange,
       onElementDelete: handleElementDelete,
       onAddNote: handleAddNote,
       onAddImage: handleAddImage,
+      onAddText: handleAddText,
     },
   };
 };

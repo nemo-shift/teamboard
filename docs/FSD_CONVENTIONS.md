@@ -1,6 +1,6 @@
 # FSD 아키텍처 컨벤션 가이드
 
-이 문서는 Vibe Board 프로젝트에서 Feature-Sliced Design (FSD) 아키텍처를 사용하는 방법과 규칙을 정의합니다.
+이 문서는 CollaBoard 프로젝트에서 Feature-Sliced Design (FSD) 아키텍처를 사용하는 방법과 규칙을 정의합니다.
 
 ## 목차
 

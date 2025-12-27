@@ -1,33 +1,52 @@
 'use client';
 
 import { Button } from '@shared/ui';
-import { useTheme } from '@shared/lib';
 
 interface CTASectionProps {
   isAuthenticated?: boolean;
 }
 
 export const CTASection = ({ isAuthenticated = false }: CTASectionProps) => {
-  const { classes } = useTheme();
-
   return (
-    <section className={`max-w-7xl mx-auto px-6 sm:px-8 lg:px-12 py-20 sm:py-24 border-t ${classes.border} ${classes.bgSecondary}`}>
-      <div className="max-w-3xl mx-auto text-center">
-        <h2 className={`text-3xl sm:text-4xl lg:text-5xl font-bold ${classes.text} mb-4 tracking-tight`}>
-          {isAuthenticated ? '새 보드를 만들어보세요' : '지금 시작하세요'}
-        </h2>
-        <p className={`text-lg sm:text-xl ${classes.textSecondary} mb-10 max-w-xl mx-auto`}>
-          {isAuthenticated
-            ? '대시보드에서 새 보드를 만들고 팀과 함께 작업을 시작하세요'
-            : '지금 바로 시작하여 아이디어를 공유하고 함께 작업해보세요'}
-        </p>
-        <Button
-          href={isAuthenticated ? '/dashboard' : '/auth'}
-          asLink
-          className="min-w-[240px] text-base sm:text-lg px-8 py-4"
-        >
-          {isAuthenticated ? '대시보드로 가기' : '시작하기'}
-        </Button>
+    <section className="max-w-7xl mx-auto px-6 sm:px-8 lg:px-12 py-20 sm:py-32 border-t border-[var(--color-border-default)]" style={{ backgroundColor: 'var(--color-base-bg)' }}>
+      <div className="max-w-6xl mx-auto">
+        <div className="relative">
+          {/* 화살표 디자인 요소 - 왼쪽으로 배치 */}
+          <div className="relative w-auto" style={{ maxWidth: '60%' }}>
+            {/* 선 */}
+            <div className="h-px bg-gradient-to-r from-[var(--color-primary-main)] dark:from-[var(--color-accent-lime-main)] via-[var(--color-primary-main)] dark:via-[var(--color-accent-lime-main)] to-transparent" />
+            {/* 화살표 */}
+            <div className="absolute right-0 top-1/2 -translate-y-1/2 translate-x-2">
+              <svg
+                className="w-10 h-10 text-[var(--color-primary-main)] dark:text-[var(--color-accent-lime-main)]"
+                fill="none"
+                stroke="currentColor"
+                viewBox="0 0 24 24"
+              >
+                <path
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  strokeWidth={2}
+                  d="M13 7l5 5m0 0l-5 5m5-5H6"
+                />
+              </svg>
+            </div>
+          </div>
+
+          {/* 텍스트와 버튼 - 화살표 끝 부분 아래에 오른쪽으로 배치 (같은 x 좌표) */}
+          <div className="absolute right-0 top-full mt-4 flex items-center gap-4">
+            <p className="text-xl sm:text-2xl text-[var(--color-text-strong)] font-medium tracking-tight whitespace-nowrap">
+              CollaBoard에서 함께 작업해요
+            </p>
+            <Button
+              href={isAuthenticated ? '/dashboard' : '/auth'}
+              asLink
+              className="px-6 py-3 text-base sm:text-lg whitespace-nowrap"
+            >
+              Go!
+            </Button>
+          </div>
+        </div>
       </div>
     </section>
   );

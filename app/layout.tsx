@@ -3,6 +3,7 @@ import { Geist, Geist_Mono } from "next/font/google";
 import "./globals.css";
 import { AuthProvider, ThemeProvider } from '@app/providers';
 import { Header } from '@widgets/header';
+import { BlobCursorWrapper } from '@app/providers/blob-cursor-wrapper';
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -15,7 +16,7 @@ const geistMono = Geist_Mono({
 });
 
 export const metadata: Metadata = {
-  title: "Vibe Board - 아이디어를 실시간으로 공유하는 화이트보드",
+  title: "CollaBoard - 아이디어를 실시간으로 공유하는 화이트보드",
   description: "아이디어를 실시간으로 공유하고 함께 발전시키는 미니멀리스트 온라인 화이트보드",
 };
 
@@ -32,7 +33,7 @@ export default function RootLayout({
             __html: `
               (function() {
                 try {
-                  const theme = localStorage.getItem('vibe-board-theme');
+                  const theme = localStorage.getItem('collaboard-theme');
                   if (theme) {
                     const parsed = JSON.parse(theme);
                     const savedTheme = parsed.state?.theme || 'system';
@@ -58,10 +59,15 @@ export default function RootLayout({
         />
       </head>
       <body
-        className={`${geistSans.variable} ${geistMono.variable} antialiased bg-white dark:bg-gray-900 text-gray-900 dark:text-gray-100 transition-colors duration-200`}
+        className={`${geistSans.variable} ${geistMono.variable} antialiased transition-colors duration-200`}
+        style={{
+          backgroundColor: 'var(--color-base-bg)',
+          color: 'var(--color-text-strong)',
+        }}
       >
         <ThemeProvider>
           <AuthProvider>
+            <BlobCursorWrapper />
             <Header />
             {children}
           </AuthProvider>

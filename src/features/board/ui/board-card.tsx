@@ -94,12 +94,12 @@ export const BoardCard = ({ board, onUpdate }: BoardCardProps) => {
         href={`/board/${board.id}`}
         className="block"
       >
-        <div className="bg-white rounded-xl border border-gray-200 shadow-sm hover:shadow-xl transition-all duration-300 p-6 h-full flex flex-col hover:-translate-y-1 hover:border-gray-300">
+        <div className="bg-[var(--color-surface-default)] rounded-xl border border-[var(--color-border-default)] shadow-sm hover:shadow-xl transition-all duration-300 p-6 h-full flex flex-col hover:-translate-y-1 hover:border-[var(--color-border-focus)]/50">
           {/* Card Header */}
           <div className="mb-4">
             <div className="flex items-start justify-between mb-3">
               <div className="flex items-center gap-2">
-                <div className="w-12 h-12 rounded-xl bg-yellow-400 flex items-center justify-center shadow-lg">
+                <div className="w-12 h-12 rounded-xl bg-[var(--color-primary-main)] dark:bg-[var(--color-accent-lime-main)] flex items-center justify-center shadow-lg">
                   <svg
                     className="w-6 h-6 text-white"
                     fill="none"
@@ -116,7 +116,7 @@ export const BoardCard = ({ board, onUpdate }: BoardCardProps) => {
                 </div>
                 {/* Pin 아이콘 */}
                 {board.isPinned && (
-                  <div className="w-5 h-5 text-gray-700 flex items-center justify-center">
+                  <div className="w-5 h-5 text-[var(--color-primary-main)] dark:text-[var(--color-accent-lime-main)] flex items-center justify-center">
                     <svg
                       className="w-4 h-4"
                       fill="currentColor"
@@ -130,7 +130,7 @@ export const BoardCard = ({ board, onUpdate }: BoardCardProps) => {
               <div className="flex items-center gap-2">
                 {/* Star 아이콘 */}
                 {board.isStarred && (
-                  <div className="w-5 h-5 text-yellow-500 flex items-center justify-center">
+                  <div className="w-5 h-5 text-[var(--color-warning)] flex items-center justify-center">
                     <svg
                       className="w-4 h-4"
                       fill="currentColor"
@@ -144,29 +144,29 @@ export const BoardCard = ({ board, onUpdate }: BoardCardProps) => {
                 <div
                   className={`px-2 py-1 rounded-full text-xs font-medium ${
                     board.isPublic
-                      ? 'bg-green-100 text-green-700'
-                      : 'bg-gray-100 text-gray-700'
+                      ? 'bg-[var(--color-success)]/20 text-[var(--color-success)] dark:bg-[var(--color-success)]/30'
+                      : 'bg-[var(--color-surface-subtle)] dark:bg-[var(--color-surface-elevated)] text-[var(--color-text-body)] dark:text-[var(--color-text-secondary)]'
                   }`}
                 >
                   {board.isPublic ? '공개' : '비공개'}
                 </div>
               </div>
             </div>
-            <h3 className="text-lg font-semibold text-gray-900 mb-1 group-hover:text-black transition-colors line-clamp-2 leading-tight">
+            <h3 className="text-lg font-semibold text-[var(--color-text-strong)] mb-1 group-hover:text-[var(--color-primary-main)] dark:group-hover:text-[var(--color-accent-lime-main)] transition-colors line-clamp-2 leading-tight">
               {board.name}
             </h3>
             {/* 보드 설명 */}
             {board.description && (
-              <p className="text-sm text-gray-500 line-clamp-2 mt-1">
+              <p className="text-sm text-[var(--color-text-body)] dark:text-[var(--color-text-secondary)] line-clamp-2 mt-1">
                 {board.description}
               </p>
             )}
           </div>
 
           {/* Card Footer */}
-          <div className="mt-auto space-y-2.5 pt-4 border-t border-gray-100">
+          <div className="mt-auto space-y-2.5 pt-4 border-t border-[var(--color-border-default)]">
             {/* 생성자 */}
-            <div className="flex items-center gap-2 text-xs text-gray-600">
+            <div className="flex items-center gap-2 text-xs text-[var(--color-text-body)] dark:text-[var(--color-text-secondary)]">
               <svg
                 className="w-3.5 h-3.5"
                 fill="none"
@@ -185,15 +185,15 @@ export const BoardCard = ({ board, onUpdate }: BoardCardProps) => {
 
             {/* 요소 개수 */}
             {board.elementCount !== undefined && (
-              <div className="flex items-center gap-2 text-sm text-gray-600">
-                <div className="w-1.5 h-1.5 rounded-full bg-gray-400"></div>
+              <div className="flex items-center gap-2 text-sm text-[var(--color-text-body)] dark:text-[var(--color-text-secondary)]">
+                <div className="w-1.5 h-1.5 rounded-full bg-[var(--color-primary-main)] dark:bg-[var(--color-accent-lime-main)]"></div>
                 <span className="font-medium">{board.elementCount}개 요소</span>
               </div>
             )}
 
             {/* 나의 최근 활동 */}
             {board.myLastActivityAt && (
-              <div className="flex items-center gap-2 text-xs text-gray-500">
+              <div className="flex items-center gap-2 text-xs text-[var(--color-text-muted)]">
                 <svg
                   className="w-3.5 h-3.5"
                   fill="none"
@@ -212,7 +212,7 @@ export const BoardCard = ({ board, onUpdate }: BoardCardProps) => {
             )}
 
             {/* 생성 날짜 */}
-            <div className="flex items-center gap-2 text-xs text-gray-500">
+            <div className="flex items-center gap-2 text-xs text-[var(--color-text-muted)]">
               <svg
                 className="w-3.5 h-3.5"
                 fill="none"
@@ -231,7 +231,7 @@ export const BoardCard = ({ board, onUpdate }: BoardCardProps) => {
 
             {/* 최근 업데이트 */}
             {board.updatedAt !== board.createdAt && (
-              <div className="flex items-center gap-2 text-xs text-gray-500">
+              <div className="flex items-center gap-2 text-xs text-[var(--color-text-muted)]">
                 <svg
                   className="w-3.5 h-3.5"
                   fill="none"
@@ -261,8 +261,8 @@ export const BoardCard = ({ board, onUpdate }: BoardCardProps) => {
             disabled={isTogglingStar}
             className={`p-1.5 rounded-md transition-all ${
               board.isStarred
-                ? 'text-yellow-500 hover:bg-yellow-50'
-                : 'text-gray-400 hover:bg-gray-50 hover:text-yellow-500'
+                ? 'text-[var(--color-warning)] hover:bg-[var(--color-warning)]/10'
+                : 'text-[var(--color-text-muted)] hover:bg-[var(--color-surface-hover)] hover:text-[var(--color-warning)]'
             } ${isTogglingStar ? 'opacity-50 cursor-not-allowed' : 'cursor-pointer'}`}
             title={board.isStarred ? '즐겨찾기 해제' : '즐겨찾기 추가'}
           >
@@ -282,8 +282,8 @@ export const BoardCard = ({ board, onUpdate }: BoardCardProps) => {
             disabled={isTogglingPin}
             className={`p-1.5 rounded-md transition-all ${
               board.isPinned
-                ? 'text-gray-700 hover:bg-gray-50'
-                : 'text-gray-400 hover:bg-gray-50 hover:text-gray-700'
+                ? 'text-[var(--color-primary-main)] dark:text-[var(--color-accent-lime-main)] hover:bg-[var(--color-primary-tint)] dark:hover:bg-[var(--color-accent-lime-tint)]'
+                : 'text-[var(--color-text-muted)] hover:bg-[var(--color-surface-hover)] hover:text-[var(--color-primary-main)] dark:hover:text-[var(--color-accent-lime-main)]'
             } ${isTogglingPin ? 'opacity-50 cursor-not-allowed' : 'cursor-pointer'}`}
             title={board.isPinned ? '고정 해제' : '고정하기'}
           >
@@ -301,7 +301,7 @@ export const BoardCard = ({ board, onUpdate }: BoardCardProps) => {
             <button
               onClick={handleDeleteClick}
               disabled={isDeleting}
-              className={`p-1.5 rounded-md transition-all text-gray-400 hover:bg-gray-50 hover:text-gray-700 ${
+              className={`p-1.5 rounded-md transition-all text-[var(--color-text-muted)] hover:bg-[var(--color-error)]/10 hover:text-[var(--color-error)] ${
                 isDeleting ? 'opacity-50 cursor-not-allowed' : 'cursor-pointer'
               }`}
               title="보드 삭제"

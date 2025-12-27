@@ -4,14 +4,13 @@ import { useTheme } from '@shared/lib';
 
 export const HowItWorksSection = () => {
   const { classes } = useTheme();
-
   return (
-    <section className={`max-w-7xl mx-auto px-6 sm:px-8 lg:px-12 py-20 sm:py-24 border-t ${classes.border} ${classes.bgSecondary}`}>
+    <section className={`max-w-7xl mx-auto px-6 sm:px-8 lg:px-12 py-20 sm:py-24 border-t ${classes.border} ${classes.bg}`}>
       <div className="max-w-6xl mx-auto">
-        <h2 className={`text-3xl sm:text-4xl lg:text-5xl font-bold ${classes.text} text-center mb-4 tracking-tight`}>
+        <h2 className="text-3xl sm:text-4xl lg:text-5xl font-bold text-[var(--color-text-strong)] text-center mb-4 tracking-tight">
           3단계로 시작하기
         </h2>
-        <p className={`text-lg sm:text-xl ${classes.textSecondary} text-center mb-16 max-w-2xl mx-auto`}>
+        <p className="text-lg sm:text-xl text-[var(--color-text-body)] dark:text-[var(--color-text-secondary)] text-center mb-16 max-w-2xl mx-auto">
           간단한 과정으로 아이디어를 공유하고 함께 작업하세요
         </p>
 
@@ -20,14 +19,14 @@ export const HowItWorksSection = () => {
           <div className="relative">
             <div className="text-center">
               {/* Step Number */}
-              <div className={`w-16 h-16 mx-auto mb-6 rounded-full ${classes.bg} border-2 ${classes.text} flex items-center justify-center shadow-lg`}>
-                <span className={`text-2xl font-bold ${classes.text}`}>1</span>
+              <div className="w-16 h-16 mx-auto mb-6 rounded-full bg-[var(--color-primary-main)] dark:bg-[var(--color-accent-lime-main)] border-2 border-[var(--color-primary-main)] dark:border-[var(--color-accent-lime-main)] flex items-center justify-center shadow-lg">
+                <span className="text-2xl font-bold text-white">1</span>
               </div>
 
               {/* Step Icon */}
-              <div className={`w-20 h-20 mx-auto mb-6 rounded-2xl ${classes.bg} ${classes.border} flex items-center justify-center shadow-lg group-hover:shadow-xl group-hover:scale-105 transition-all duration-300`}>
+              <div className="w-20 h-20 mx-auto mb-6 rounded-2xl bg-[var(--color-primary-tint)] dark:bg-[var(--color-accent-lime-tint)] border-2 border-[var(--color-primary-main)] dark:border-[var(--color-accent-lime-main)] flex items-center justify-center shadow-lg group-hover:shadow-xl group-hover:scale-105 transition-all duration-300">
                 <svg
-                  className={`w-10 h-10 ${classes.text}`}
+                  className="w-10 h-10 text-[var(--color-primary-main)] dark:text-[var(--color-accent-lime-main)]"
                   fill="none"
                   stroke="currentColor"
                   viewBox="0 0 24 24"
@@ -41,17 +40,17 @@ export const HowItWorksSection = () => {
                 </svg>
               </div>
 
-              <h3 className={`text-xl font-semibold ${classes.text} mb-3`}>
+              <h3 className="text-xl font-semibold text-[var(--color-text-strong)] mb-3">
                 로그인 또는 회원가입
               </h3>
-              <p className={`${classes.textSecondary} leading-relaxed text-sm sm:text-base`}>
+              <p className="text-[var(--color-text-body)] dark:text-[var(--color-text-secondary)] leading-relaxed text-sm sm:text-base">
                 Google 계정 또는 이메일로 간편하게 시작하세요
               </p>
             </div>
 
             {/* Connector Line */}
-            <div className={`hidden md:block absolute top-8 left-full w-full h-0.5 ${classes.borderSecondary} -z-10`}>
-              <div className={`absolute right-0 top-1/2 transform -translate-y-1/2 w-3 h-3 ${classes.borderSecondary} rounded-full`} />
+            <div className="hidden md:block absolute top-8 left-full w-full h-0.5 bg-[var(--color-primary-main)] dark:bg-[var(--color-accent-lime-main)] -z-10">
+              <div className="absolute right-0 top-1/2 transform -translate-y-1/2 w-3 h-3 bg-[var(--color-primary-main)] dark:bg-[var(--color-accent-lime-main)] rounded-full" />
             </div>
           </div>
 
@@ -59,14 +58,14 @@ export const HowItWorksSection = () => {
           <div className="relative">
             <div className="text-center">
               {/* Step Number */}
-              <div className={`w-16 h-16 mx-auto mb-6 rounded-full ${classes.bg} border-2 ${classes.text} flex items-center justify-center shadow-lg`}>
-                <span className={`text-2xl font-bold ${classes.text}`}>2</span>
+              <div className="w-16 h-16 mx-auto mb-6 rounded-full bg-[var(--color-primary-main)] dark:bg-[var(--color-accent-lime-main)] border-2 border-[var(--color-primary-main)] dark:border-[var(--color-accent-lime-main)] flex items-center justify-center shadow-lg">
+                <span className="text-2xl font-bold text-white">2</span>
               </div>
 
               {/* Step Icon */}
-              <div className={`w-20 h-20 mx-auto mb-6 rounded-2xl ${classes.bg} ${classes.border} flex items-center justify-center shadow-lg group-hover:shadow-xl group-hover:scale-105 transition-all duration-300`}>
+              <div className="w-20 h-20 mx-auto mb-6 rounded-2xl bg-[var(--color-secondary-tint)] dark:bg-[var(--color-accent-blue-tint)] border-2 border-[var(--color-secondary-main)] dark:border-[var(--color-accent-blue-main)] flex items-center justify-center shadow-lg group-hover:shadow-xl group-hover:scale-105 transition-all duration-300">
                 <svg
-                  className={`w-10 h-10 ${classes.text}`}
+                  className="w-10 h-10 text-[var(--color-secondary-main)] dark:text-[var(--color-accent-blue-main)]"
                   fill="none"
                   stroke="currentColor"
                   viewBox="0 0 24 24"
@@ -80,17 +79,17 @@ export const HowItWorksSection = () => {
                 </svg>
               </div>
 
-              <h3 className={`text-xl font-semibold ${classes.text} mb-3`}>
+              <h3 className="text-xl font-semibold text-[var(--color-text-strong)] mb-3">
                 보드 생성 또는 참여
               </h3>
-              <p className={`${classes.textSecondary} leading-relaxed text-sm sm:text-base`}>
+              <p className="text-[var(--color-text-body)] dark:text-[var(--color-text-secondary)] leading-relaxed text-sm sm:text-base">
                 새 보드를 만들거나 링크로 팀원의 보드에 참여하세요
               </p>
             </div>
 
             {/* Connector Line */}
-            <div className={`hidden md:block absolute top-8 left-full w-full h-0.5 ${classes.borderSecondary} -z-10`}>
-              <div className={`absolute right-0 top-1/2 transform -translate-y-1/2 w-3 h-3 ${classes.borderSecondary} rounded-full`} />
+            <div className="hidden md:block absolute top-8 left-full w-full h-0.5 bg-[var(--color-primary-main)] dark:bg-[var(--color-accent-lime-main)] -z-10">
+              <div className="absolute right-0 top-1/2 transform -translate-y-1/2 w-3 h-3 bg-[var(--color-primary-main)] dark:bg-[var(--color-accent-lime-main)] rounded-full" />
             </div>
           </div>
 
@@ -98,14 +97,14 @@ export const HowItWorksSection = () => {
           <div className="relative">
             <div className="text-center">
               {/* Step Number */}
-              <div className={`w-16 h-16 mx-auto mb-6 rounded-full ${classes.bg} border-2 ${classes.text} flex items-center justify-center shadow-lg`}>
-                <span className={`text-2xl font-bold ${classes.text}`}>3</span>
+              <div className="w-16 h-16 mx-auto mb-6 rounded-full bg-[var(--color-primary-main)] dark:bg-[var(--color-accent-lime-main)] border-2 border-[var(--color-primary-main)] dark:border-[var(--color-accent-lime-main)] flex items-center justify-center shadow-lg">
+                <span className="text-2xl font-bold text-white">3</span>
               </div>
 
               {/* Step Icon */}
-              <div className={`w-20 h-20 mx-auto mb-6 rounded-2xl ${classes.bg} ${classes.border} flex items-center justify-center shadow-lg group-hover:shadow-xl group-hover:scale-105 transition-all duration-300`}>
+              <div className="w-20 h-20 mx-auto mb-6 rounded-2xl bg-[var(--color-primary-tint)] dark:bg-[var(--color-accent-lime-tint)] border-2 border-[var(--color-primary-main)] dark:border-[var(--color-accent-lime-main)] flex items-center justify-center shadow-lg group-hover:shadow-xl group-hover:scale-105 transition-all duration-300">
                 <svg
-                  className={`w-10 h-10 ${classes.text}`}
+                  className="w-10 h-10 text-[var(--color-primary-main)] dark:text-[var(--color-accent-lime-main)]"
                   fill="none"
                   stroke="currentColor"
                   viewBox="0 0 24 24"
@@ -119,10 +118,10 @@ export const HowItWorksSection = () => {
                 </svg>
               </div>
 
-              <h3 className={`text-xl font-semibold ${classes.text} mb-3`}>
+              <h3 className="text-xl font-semibold text-[var(--color-text-strong)] mb-3">
                 실시간으로 협업
               </h3>
-              <p className={`${classes.textSecondary} leading-relaxed text-sm sm:text-base`}>
+              <p className="text-[var(--color-text-body)] dark:text-[var(--color-text-secondary)] leading-relaxed text-sm sm:text-base">
                 포스트잇과 이미지를 추가하고 팀과 함께 아이디어를 발전시키세요
               </p>
             </div>

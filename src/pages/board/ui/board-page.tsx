@@ -142,11 +142,6 @@ export const BoardPage = () => {
     handleAddImageWithFile,
   } = useBoardActions();
 
-  // 이미지 추가 핸들러 래핑
-  const handleAddImageWithFileWrapper = (position: { x: number; y: number }) => {
-    handleAddImageWithFile(position, handlers.onAddImage);
-  };
-
   // 보드 업데이트 핸들러
   const handleBoardUpdate = async (updates: { name?: string; description?: string; isPublic?: boolean }) => {
     if (!boardId) return;
@@ -187,16 +182,21 @@ export const BoardPage = () => {
         handlers.onAddNote(position);
         setAddMode(null);
       },
-      // onAddImage는 handleAddImageWithFileWrapper를 사용
+      // onAddImage는 handleAddImageWithFile를 직접 호출
       onAddImage: (position: { x: number; y: number }) => {
-        handleAddImageWithFileWrapper(position);
+        handleAddImageWithFile(position, handlers.onAddImage);
+      },
+      // onAddText는 addMode를 null로 설정하는 추가 로직이 필요
+      onAddText: (position: { x: number; y: number }) => {
+        handlers.onAddText?.(position);
+        setAddMode(null);
       },
     },
     checkCanEdit,
     onPermissionDenied: () => setIsSignupModalOpen(true),
   });
 
-  // 포스트잇 추가 버튼 클릭 시 체크
+  // 포스트잇/이미지 추가 모드 변경 (권한 체크 포함)
   const handleAddModeChange = useCallback((mode: 'note' | 'image' | null) => {
     if (mode && !checkCanEdit()) {
       return;
@@ -204,8 +204,8 @@ export const BoardPage = () => {
     setAddMode(mode);
   }, [checkCanEdit, setAddMode]);
 
-  // 이미지 업로드 버튼 클릭 시 체크
-  const handleImageButtonClickWrapper = useCallback(() => {
+  // 이미지 업로드 버튼 클릭 핸들러 (권한 체크 후 파일 선택 다이얼로그 열기)
+  const handleImageButtonClickWithCheck = useCallback(() => {
     if (!checkCanEdit()) {
       return;
     }
@@ -226,7 +226,7 @@ export const BoardPage = () => {
         isPublic={board?.isPublic ?? false}
         addMode={addMode}
         onAddModeChange={handleAddModeChange}
-        onImageButtonClick={handleImageButtonClickWrapper}
+        onImageButtonClick={handleImageButtonClickWithCheck}
         fileInputRef={fileInputRef}
         onFileSelect={handleFileSelect}
         onBoardUpdate={handleBoardUpdate}
@@ -250,9 +250,11 @@ export const BoardPage = () => {
           onElementResize={guardedHandlers.onElementResize}
           onElementUpdate={guardedHandlers.onElementUpdate}
           onElementColorChange={guardedHandlers.onElementColorChange}
+          onElementStyleChange={guardedHandlers.onElementStyleChange}
           onElementDelete={guardedHandlers.onElementDelete}
           onAddNote={guardedHandlers.onAddNote}
           onAddImage={guardedHandlers.onAddImage}
+          onAddText={guardedHandlers.onAddText}
           addMode={addMode}
           canEdit={!isAnonymous}
           onEditBlocked={() => setIsSignupModalOpen(true)}

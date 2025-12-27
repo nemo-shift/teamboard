@@ -1,6 +1,6 @@
 # FSD 코딩 가이드
 
-이 문서는 Vibe Board 프로젝트에서 Feature-Sliced Design (FSD) 아키텍처를 따르는 방법을 안내합니다.
+이 문서는 CollaBoard 프로젝트에서 Feature-Sliced Design (FSD) 아키텍처를 따르는 방법을 안내합니다.
 
 ## 빠른 참조 체크리스트
 

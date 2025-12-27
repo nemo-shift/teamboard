@@ -13,7 +13,7 @@ export const ThemeProvider = ({ children }: { children: React.ReactNode }) => {
     
     // localStorage에서 직접 읽어서 즉시 적용
     try {
-      const stored = localStorage.getItem('vibe-board-theme');
+      const stored = localStorage.getItem('collaboard-theme');
       if (stored) {
         const parsed = JSON.parse(stored);
         const savedTheme = parsed.state?.theme || 'system';

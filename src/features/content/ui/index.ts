@@ -4,3 +4,5 @@
 // export { ImageUploader } from './components/image-uploader';
 // export { ContentToolbar } from './components/content-toolbar';
 
+export * from './text-toolbar';
+
